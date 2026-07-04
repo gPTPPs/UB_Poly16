@@ -4,6 +4,8 @@
 VST3 + Standalone (Windows), built with [JUCE 8](https://juce.com).
 A tribute by THE UNBoRN / [RetroVault](https://retrovault.be).
 
+![UB_Poly16](docs/screenshot.png)
+
 ## Features
 
 - **2 DCOs** per voice: polyBLEP saw & pulse (PW + PWM), triangle, sub-oscillator, noise
