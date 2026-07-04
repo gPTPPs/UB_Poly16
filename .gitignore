@@ -1,6 +1,7 @@
 # build output
 build/
-installer/Output/
+build-*/
+installer/Output*/
 
 # IDE / local
 .vs/

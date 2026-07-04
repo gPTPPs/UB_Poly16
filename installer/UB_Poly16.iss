@@ -3,7 +3,10 @@
 #define MyAppVersion "0.6.0"
 #define MyAppPublisher "TheUNBoRN"
 #define MyAppExeName "UB_Poly16.exe"
-#define RelDir "D:\Audio\UB_Poly16\build\UB_Poly16_artefacts\Release"
+; artefacts dir — override with ISCC /DRelDir=<path> (e.g. a no-ASIO release build)
+#ifndef RelDir
+  #define RelDir SourcePath + "..\build\UB_Poly16_artefacts\Release"
+#endif
 
 [Setup]
 AppId={{4E8A1C7D-2F93-4B5A-9E61-7C0A3D5F2B18}
@@ -12,7 +15,7 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputDir=D:\Audio\UB_Poly16\installer\Output
+OutputDir=Output
 OutputBaseFilename=UB_Poly16_Setup_{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
