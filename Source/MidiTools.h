@@ -283,6 +283,14 @@ public:
         return -1;
     }
 
+    // paramID waiting for a CC, empty when idle — drives the editor's
+    // "MIDI Learn..." indicator
+    juce::String getArmed() const
+    {
+        const juce::SpinLock::ScopedLockType sl (lock);
+        return armed;
+    }
+
     void process (const juce::MidiBuffer& midi)
     {
         for (const auto meta : midi)

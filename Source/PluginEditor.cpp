@@ -187,8 +187,15 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     setResizeLimits (1000, 740, 1800, 1300);
     setSize (1220, 960);
 
+    learnLabel.setJustificationType (juce::Justification::centredRight);
+    learnLabel.setColour (juce::Label::textColourId, UBColours::accent);
+    learnLabel.setFont (juce::Font (juce::FontOptions (13.0f)).boldened());
+    addAndMakeVisible (learnLabel);
+
+    lastPresetName = proc.presets.getCurrentName();
+
     addMouseListener (this, true);   // right-click on any control = MIDI Learn menu
-    startTimer (250);   // window fix (first tick) + chord memory UI refresh
+    startTimer (250);   // window fix (first tick) + chord/learn/preset UI refresh
 }
 
 void UBEditor::timerCallback()
@@ -208,6 +215,26 @@ void UBEditor::timerCallback()
         txt = "--";
     if (chordLabel.getText() != txt)
         chordLabel.setText (txt, juce::dontSendNotification);
+
+    // ---- MIDI Learn indicator ----
+    const auto armed = proc.ccMap.getArmed();
+    juce::String learnTxt;
+    if (armed.isNotEmpty())
+    {
+        auto* p = proc.apvts.getParameter (armed);
+        learnTxt = "MIDI Learn : envoyez un CC -> "
+                   + (p != nullptr ? p->getName (32) : armed) + "...";
+    }
+    if (learnLabel.getText() != learnTxt)
+        learnLabel.setText (learnTxt, juce::dontSendNotification);
+
+    // ---- preset name resync (the host can setState behind our back) ----
+    const auto cur = proc.presets.getCurrentName();
+    if (cur != lastPresetName)
+    {
+        lastPresetName = cur;
+        refreshPresetList();
+    }
 }
 
 void UBEditor::mouseDown (const juce::MouseEvent& e)
@@ -454,6 +481,7 @@ void UBEditor::resized()
         fb.items.add (item (exportBtn, 0.0f, 72));
         if (isStandalone)
             fb.items.add (item (audioBtn, 0.0f, 92));
+        fb.items.add (item (learnLabel, 0.8f, 120));   // empty when no learn is armed
         fb.performLayout (bar);
     }
 

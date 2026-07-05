@@ -142,6 +142,11 @@ private:
     juce::Label chordLabel;
     bool windowFixed = false;
 
+    // MIDI Learn indicator + host-driven preset name changes (both polled
+    // by the timer: setStateInformation may run off the message thread)
+    juce::Label learnLabel;
+    juce::String lastPresetName;
+
     // oscilloscope + categorised preset list
     ScopeComponent scopeComp { proc.scope };
     juce::StringArray presetIdToName;   // ComboBox item id-1 -> display name

@@ -182,6 +182,7 @@ void UBAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     {
         xml->setAttribute ("chordIntervals", chord.toString());
         xml->setAttribute ("midiMap", ccMap.toString());
+        xml->setAttribute ("currentPresetName", presets.getCurrentName());
         copyXmlToBinary (*xml, destData);
     }
 }
@@ -193,6 +194,8 @@ void UBAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
         {
             chord.fromString (xml->getStringAttribute ("chordIntervals"));
             ccMap.fromString (xml->getStringAttribute ("midiMap"));
+            if (const auto name = xml->getStringAttribute ("currentPresetName"); name.isNotEmpty())
+                presets.setCurrentName (name);   // absent in pre-0.6.1 states
             apvts.replaceState (juce::ValueTree::fromXml (*xml));
         }
 }

@@ -26,6 +26,11 @@ public:
     juce::StringArray getAllDisplayNames() const;
     juce::String getCurrentName() const { return currentName; }
 
+    // Restores the DISPLAYED name only (parameter values travel in the APVTS
+    // state) — used when the host reloads the session state. May be called
+    // off the message thread; the editor's timer picks the change up.
+    void setCurrentName (const juce::String& n) { currentName = n; }
+
     void loadNext();
     void loadPrevious();
 
