@@ -1,6 +1,6 @@
 ; Inno Setup script for UB_Poly16 (Juno-style 16-voice synth)
 #define MyAppName "UB_Poly16"
-#define MyAppVersion "0.6.1"
+#define MyAppVersion "0.7.0"
 #define MyAppPublisher "TheUNBoRN"
 #define MyAppExeName "UB_Poly16.exe"
 ; artefacts dir — override with ISCC /DRelDir=<path> (e.g. a no-ASIO release build)
