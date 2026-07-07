@@ -48,6 +48,27 @@ void PresetManager::buildFactory()
     add ("BS Hard Saw", { { ID::o1Saw, 1.0f }, { ID::o1Octave, -1.0f }, { ID::fCutoff, 900.0f }, { ID::fReso, 0.35f },
         { ID::fEnvAmt, 0.6f }, { ID::fDrive, 2.0f }, { ID::fD, 0.25f }, { ID::fS, 0.2f }, { ID::aS, 0.5f }, { ID::aR, 0.1f } });
 
+    add ("BS Sync Bass", { { ID::o1Saw, 0.4f }, { ID::o1Octave, -1.0f }, { ID::o2On, 1.0f }, { ID::o2Sync, 1.0f },
+        { ID::o2Saw, 1.0f }, { ID::o2Coarse, 12.0f }, { ID::fCutoff, 800.0f }, { ID::fReso, 0.3f }, { ID::fEnvAmt, 0.5f },
+        { ID::fD, 0.2f }, { ID::fS, 0.1f }, { ID::pEnvAmt, 12.0f }, { ID::pA, 0.001f }, { ID::pD, 0.18f }, { ID::pS, 0.0f },
+        { ID::aA, 0.002f }, { ID::aD, 0.3f }, { ID::aS, 0.4f }, { ID::aR, 0.1f }, { ID::voiceMode, 1.0f }, { ID::chorus, 0.0f } });
+    add ("BS Click Funk", { { ID::o1Saw, 0.9f }, { ID::o1Sub, 0.4f }, { ID::o1Octave, -1.0f }, { ID::attackClick, 0.5f },
+        { ID::fCutoff, 1200.0f }, { ID::fReso, 0.4f }, { ID::fEnvAmt, 0.6f }, { ID::fD, 0.18f }, { ID::fS, 0.0f },
+        { ID::aA, 0.002f }, { ID::aD, 0.22f }, { ID::aS, 0.2f }, { ID::aR, 0.1f }, { ID::voiceMode, 1.0f }, { ID::chorus, 0.0f } });
+    add ("BS Moroder Bass", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.5f }, { ID::o1Octave, -1.0f },
+        { ID::fCutoff, 700.0f }, { ID::fReso, 0.5f }, { ID::fEnvAmt, 0.5f }, { ID::fD, 0.2f }, { ID::fS, 0.1f },
+        { ID::aA, 0.002f }, { ID::aD, 0.3f }, { ID::aS, 0.3f }, { ID::aR, 0.08f }, { ID::voiceMode, 1.0f }, { ID::chorus, 0.0f },
+        { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f }, { ID::dlyFb, 0.35f }, { ID::dlyMix, 0.2f } });
+    add ("BS Supernature", { { ID::o1Saw, 1.0f }, { ID::o1Sub, 0.3f }, { ID::o1Octave, -1.0f }, { ID::fCutoff, 500.0f },
+        { ID::fReso, 0.7f }, { ID::fEnvAmt, 0.3f }, { ID::fLfo, 0.5f }, { ID::lfoRate, 5.5f }, { ID::fDrive, 2.0f },
+        { ID::aS, 0.6f }, { ID::aR, 0.1f }, { ID::chorus, 0.0f } });
+    add ("BS Outrun Bass", { { ID::o1Saw, 1.0f }, { ID::o1Sub, 0.5f }, { ID::o1Octave, -1.0f }, { ID::fCutoff, 900.0f },
+        { ID::fReso, 0.3f }, { ID::fEnvAmt, 0.5f }, { ID::fD, 0.25f }, { ID::fS, 0.2f }, { ID::fDrive, 1.5f },
+        { ID::aA, 0.002f }, { ID::aD, 0.3f }, { ID::aS, 0.5f }, { ID::aR, 0.12f }, { ID::chorus, 1.0f } });
+    add ("BS Blue Monday", { { ID::o1Saw, 1.0f }, { ID::o1Octave, -1.0f }, { ID::fCutoff, 1000.0f }, { ID::fReso, 0.25f },
+        { ID::fEnvAmt, 0.4f }, { ID::fD, 0.2f }, { ID::fS, 0.1f }, { ID::aA, 0.002f }, { ID::aD, 0.28f }, { ID::aS, 0.3f },
+        { ID::aR, 0.08f }, { ID::voiceMode, 1.0f }, { ID::chorus, 0.0f } });
+
     // ---------------- LEAD ----------------
     add ("LD Saw Lead", { { ID::o1Saw, 1.0f }, { ID::fCutoff, 5000.0f }, { ID::fReso, 0.2f }, { ID::fEnvAmt, 0.2f },
         { ID::aS, 0.8f }, { ID::aR, 0.2f }, { ID::lfoPitch, 0.08f }, { ID::lfoDelay, 0.5f }, { ID::lfoRate, 5.5f },
@@ -77,6 +98,49 @@ void PresetManager::buildFactory()
         { ID::hpf, 1.0f }, { ID::fCutoff, 8000.0f }, { ID::fReso, 0.1f },
         { ID::aA, 0.005f }, { ID::aS, 0.8f }, { ID::aR, 0.35f }, { ID::chorus, 0.0f },
         { ID::dlyOn, 1.0f }, { ID::dlyNote, 2.0f }, { ID::dlyFb, 0.35f }, { ID::dlyMix, 0.18f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.6f }, { ID::rvbMix, 0.25f } });
+
+    add ("LD Sync Screamer", { { ID::o1Saw, 0.2f }, { ID::o2On, 1.0f }, { ID::o2Sync, 1.0f }, { ID::o2Saw, 1.0f },
+        { ID::o2Coarse, 7.0f }, { ID::o2Octave, 1.0f }, { ID::fCutoff, 4000.0f }, { ID::fReso, 0.5f }, { ID::fDrive, 2.5f },
+        { ID::fEnvAmt, 0.3f }, { ID::pEnvAmt, 24.0f }, { ID::pA, 0.001f }, { ID::pD, 0.5f }, { ID::pS, 0.0f },
+        { ID::voiceMode, 2.0f }, { ID::aA, 0.005f }, { ID::aS, 0.8f }, { ID::aR, 0.2f }, { ID::chorus, 0.0f },
+        { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.4f }, { ID::dlyMix, 0.25f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.5f }, { ID::rvbMix, 0.2f } });
+    add ("LD Ring Lead", { { ID::o1Saw, 0.8f }, { ID::o2On, 1.0f }, { ID::o2Saw, 0.8f }, { ID::o2Coarse, 7.0f },
+        { ID::o2Ring, 0.5f }, { ID::fCutoff, 4000.0f }, { ID::fReso, 0.25f }, { ID::aS, 0.8f }, { ID::aR, 0.2f },
+        { ID::lfoPitch, 0.08f }, { ID::lfoDelay, 0.5f }, { ID::chorus, 1.0f } });
+    add ("LD Sweet Dreams", { { ID::o1Saw, 1.0f }, { ID::o2On, 1.0f }, { ID::o2Saw, 1.0f }, { ID::o2Detune, 14.0f },
+        { ID::fType, 1.0f }, { ID::fCutoff, 2600.0f }, { ID::fReso, 0.2f }, { ID::fEnvAmt, 0.2f }, { ID::fD, 0.4f }, { ID::fS, 0.3f },
+        { ID::glide, 0.02f }, { ID::voiceMode, 2.0f }, { ID::aA, 0.004f }, { ID::aD, 0.4f }, { ID::aS, 0.6f }, { ID::aR, 0.2f },
+        { ID::chorus, 1.0f } });
+    add ("LD Jarre Oxygene", { { ID::o1Saw, 1.0f }, { ID::fCutoff, 1500.0f }, { ID::fReso, 0.5f }, { ID::fEnvAmt, 0.5f },
+        { ID::fD, 0.6f }, { ID::fS, 0.5f }, { ID::glide, 0.03f }, { ID::voiceMode, 2.0f },
+        { ID::lfoPitch, 0.1f }, { ID::lfoRate, 5.0f }, { ID::lfoDelay, 0.7f },
+        { ID::aA, 0.02f }, { ID::aS, 0.8f }, { ID::aR, 0.4f }, { ID::chorus, 1.0f },
+        { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.4f }, { ID::dlyMix, 0.25f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.6f }, { ID::rvbMix, 0.25f } });
+    add ("LD Kraftwerk Model", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.5f }, { ID::fCutoff, 3500.0f },
+        { ID::fReso, 0.15f }, { ID::aA, 0.005f }, { ID::aD, 0.3f }, { ID::aS, 0.7f }, { ID::aR, 0.15f }, { ID::chorus, 1.0f } });
+    add ("LD Axel F", { { ID::o1Saw, 0.6f }, { ID::o1Pulse, 0.5f }, { ID::fCutoff, 4000.0f }, { ID::fReso, 0.3f },
+        { ID::fEnvAmt, 0.4f }, { ID::fD, 0.3f }, { ID::fS, 0.2f }, { ID::aA, 0.004f }, { ID::aD, 0.3f }, { ID::aS, 0.4f },
+        { ID::aR, 0.2f }, { ID::chorus, 1.0f }, { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.4f }, { ID::rvbMix, 0.15f } });
+    add ("LD Take On Me", { { ID::o1Saw, 0.3f }, { ID::o1Pulse, 0.7f }, { ID::fCutoff, 5000.0f }, { ID::fReso, 0.2f },
+        { ID::fEnvAmt, 0.3f }, { ID::fD, 0.3f }, { ID::fS, 0.3f }, { ID::aA, 0.004f }, { ID::aD, 0.3f }, { ID::aS, 0.5f },
+        { ID::aR, 0.2f }, { ID::chorus, 1.0f }, { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.3f }, { ID::dlyMix, 0.2f } });
+    add ("LD Numan Cars", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 0.8f }, { ID::o1Pw, 0.6f }, { ID::o1Pwm, 0.2f },
+        { ID::o2On, 1.0f }, { ID::o2Pulse, 0.8f }, { ID::o2Pw, 0.4f }, { ID::o2Detune, 12.0f }, { ID::lfoRate, 0.7f },
+        { ID::fType, 1.0f }, { ID::fCutoff, 3000.0f }, { ID::aA, 0.02f }, { ID::aS, 0.85f }, { ID::aR, 0.3f }, { ID::chorus, 3.0f } });
+    add ("LD Miami Vice", { { ID::o1Saw, 0.6f }, { ID::o1Tri, 0.4f }, { ID::fCutoff, 4500.0f }, { ID::fReso, 0.2f },
+        { ID::fEnvAmt, 0.2f }, { ID::glide, 0.02f }, { ID::voiceMode, 2.0f }, { ID::aA, 0.01f }, { ID::aS, 0.8f }, { ID::aR, 0.4f },
+        { ID::chorus, 1.0f }, { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.4f }, { ID::dlyMix, 0.28f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.6f }, { ID::rvbMix, 0.3f } });
+    add ("LD Chariots", { { ID::o1Saw, 1.0f }, { ID::o2On, 1.0f }, { ID::o2Saw, 0.5f }, { ID::o2Detune, 6.0f },
+        { ID::fCutoff, 3500.0f }, { ID::fReso, 0.15f }, { ID::glide, 0.05f }, { ID::voiceMode, 2.0f },
+        { ID::lfoPitch, 0.06f }, { ID::lfoRate, 5.0f }, { ID::lfoDelay, 0.8f }, { ID::aA, 0.03f }, { ID::aS, 0.85f }, { ID::aR, 0.6f },
+        { ID::chorus, 1.0f }, { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.75f }, { ID::rvbPre, 40.0f }, { ID::rvbMix, 0.35f } });
+    add ("LD Outrun Lead", { { ID::o1Saw, 1.0f }, { ID::uniVoices, 4.0f }, { ID::uniDetune, 18.0f }, { ID::uniSpread, 0.9f },
+        { ID::hpf, 1.0f }, { ID::fCutoff, 6000.0f }, { ID::fReso, 0.15f }, { ID::aA, 0.005f }, { ID::aS, 0.85f }, { ID::aR, 0.3f },
+        { ID::chorus, 0.0f }, { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.4f }, { ID::dlyMix, 0.25f },
         { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.6f }, { ID::rvbMix, 0.25f } });
 
     // ---------------- PAD ----------------
@@ -132,6 +196,14 @@ void PresetManager::buildFactory()
         { ID::aA, 0.7f }, { ID::aD, 1.2f }, { ID::aS, 0.8f }, { ID::aR, 2.0f },
         { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.65f }, { ID::rvbMix, 0.28f } });
 
+    add ("PD Jarre Strings", { { ID::o1Saw, 0.8f }, { ID::o2On, 1.0f }, { ID::o2Saw, 0.8f }, { ID::o2Detune, 12.0f },
+        { ID::fCutoff, 2400.0f }, { ID::fEnvAmt, 0.2f }, { ID::fA, 0.6f }, { ID::aA, 0.5f }, { ID::aD, 1.0f }, { ID::aS, 0.85f },
+        { ID::aR, 1.2f }, { ID::chorus, 3.0f }, { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.6f }, { ID::rvbMix, 0.25f } });
+    add ("PD Outrun Pad", { { ID::o1Saw, 1.0f }, { ID::uniVoices, 5.0f }, { ID::uniDetune, 16.0f }, { ID::uniSpread, 1.0f },
+        { ID::hpf, 1.0f }, { ID::fCutoff, 3000.0f }, { ID::fReso, 0.1f }, { ID::aA, 0.8f }, { ID::aD, 1.0f }, { ID::aS, 0.85f },
+        { ID::aR, 1.8f }, { ID::chorus, 0.0f }, { ID::dlyOn, 1.0f }, { ID::dlyNote, 1.0f }, { ID::dlyFb, 0.35f }, { ID::dlyMix, 0.2f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.75f }, { ID::rvbPre, 30.0f }, { ID::rvbMix, 0.35f } });
+
     // ---------------- KEYS ----------------
     add ("KY E-Piano", { { ID::o1Pulse, 0.7f }, { ID::o1Pw, 0.4f }, { ID::o1Sub, 0.2f }, { ID::fCutoff, 3500.0f },
         { ID::fReso, 0.2f }, { ID::fEnvAmt, 0.4f }, { ID::fD, 0.6f }, { ID::fS, 0.1f },
@@ -159,6 +231,17 @@ void PresetManager::buildFactory()
         { ID::aA, 0.004f }, { ID::aD, 0.9f }, { ID::aS, 0.3f }, { ID::aR, 0.4f }, { ID::chorus, 2.0f },
         { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.4f }, { ID::rvbMix, 0.18f } });
 
+    add ("KY Gamelan", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 0.6f }, { ID::o1Octave, 1.0f }, { ID::o2On, 1.0f },
+        { ID::o2Pulse, 0.6f }, { ID::o2Coarse, 14.0f }, { ID::o2Ring, 0.6f }, { ID::fType, 4.0f }, { ID::fCutoff, 3000.0f },
+        { ID::fReso, 0.3f }, { ID::aA, 0.002f }, { ID::aD, 0.8f }, { ID::aS, 0.0f }, { ID::aR, 0.5f }, { ID::chorus, 1.0f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.5f }, { ID::rvbMix, 0.2f } });
+    add ("KY Clavinet", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.28f }, { ID::attackClick, 0.4f },
+        { ID::fCutoff, 3500.0f }, { ID::fReso, 0.4f }, { ID::fEnvAmt, 0.5f }, { ID::fD, 0.25f }, { ID::fS, 0.0f },
+        { ID::aA, 0.002f }, { ID::aD, 0.28f }, { ID::aS, 0.15f }, { ID::aR, 0.12f }, { ID::chorus, 0.0f } });
+    add ("KY Tine EP", { { ID::o1Saw, 0.0f }, { ID::o1Tri, 0.3f }, { ID::o1Pulse, 0.5f }, { ID::o1Pw, 0.4f }, { ID::o1Sub, 0.2f },
+        { ID::attackClick, 0.25f }, { ID::fCutoff, 3000.0f }, { ID::fReso, 0.15f }, { ID::fEnvAmt, 0.3f }, { ID::fD, 0.7f }, { ID::fS, 0.1f },
+        { ID::aA, 0.004f }, { ID::aD, 1.0f }, { ID::aS, 0.25f }, { ID::aR, 0.4f }, { ID::chorus, 2.0f } });
+
     // ---------------- PLUCK ----------------
     add ("PL Synth", { { ID::o1Saw, 0.8f }, { ID::o1Pulse, 0.4f }, { ID::fCutoff, 6000.0f }, { ID::fReso, 0.4f },
         { ID::fEnvAmt, 0.7f }, { ID::fD, 0.25f }, { ID::fS, 0.0f }, { ID::aA, 0.005f }, { ID::aD, 0.25f },
@@ -183,6 +266,11 @@ void PresetManager::buildFactory()
     add ("PL Wood", { { ID::o1Pulse, 0.5f }, { ID::o1Sub, 0.5f }, { ID::fType, 0.0f }, { ID::fCutoff, 2500.0f },
         { ID::fReso, 0.3f }, { ID::fEnvAmt, 0.5f }, { ID::fD, 0.2f }, { ID::aA, 0.002f }, { ID::aD, 0.25f },
         { ID::aS, 0.0f }, { ID::aR, 0.15f } });
+
+    add ("PL Human League", { { ID::o1Saw, 0.8f }, { ID::o2On, 1.0f }, { ID::o2Saw, 0.8f }, { ID::o2Detune, 10.0f },
+        { ID::fCutoff, 4000.0f }, { ID::fReso, 0.3f }, { ID::fEnvAmt, 0.6f }, { ID::fD, 0.25f }, { ID::fS, 0.0f },
+        { ID::aA, 0.003f }, { ID::aD, 0.28f }, { ID::aS, 0.0f }, { ID::aR, 0.18f }, { ID::chorus, 1.0f },
+        { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.3f }, { ID::dlyMix, 0.18f } });
 
     // ---------------- BRASS / STRINGS ----------------
     add ("BR Classic", { { ID::o1Saw, 1.0f }, { ID::o2On, 1.0f }, { ID::o2Saw, 1.0f }, { ID::o2Detune, 8.0f },
@@ -228,6 +316,24 @@ void PresetManager::buildFactory()
         { ID::fCutoff, 2500.0f }, { ID::fEnvAmt, 0.3f }, { ID::aR, 0.6f }, { ID::arpOn, 1.0f }, { ID::arpHold, 1.0f },
         { ID::arpMode, 2.0f }, { ID::arpRate, 3.0f }, { ID::arpOct, 2.0f }, { ID::arpGate, 0.7f }, { ID::chorus, 3.0f } });
 
+    add ("AR Moroder Seq", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.5f }, { ID::fCutoff, 1600.0f },
+        { ID::fReso, 0.55f }, { ID::fEnvAmt, 0.4f }, { ID::fD, 0.15f }, { ID::fS, 0.0f }, { ID::aA, 0.003f }, { ID::aD, 0.2f },
+        { ID::aS, 0.4f }, { ID::aR, 0.08f }, { ID::arpOn, 1.0f }, { ID::arpMode, 0.0f }, { ID::arpRate, 3.0f }, { ID::arpOct, 1.0f },
+        { ID::arpGate, 0.5f }, { ID::chorus, 0.0f }, { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f },
+        { ID::dlyFb, 0.4f }, { ID::dlyMix, 0.28f } });
+    add ("AR Chase", { { ID::o1Saw, 0.3f }, { ID::o1Pulse, 0.8f }, { ID::fCutoff, 2500.0f }, { ID::fReso, 0.4f },
+        { ID::fEnvAmt, 0.4f }, { ID::fD, 0.15f }, { ID::fS, 0.1f }, { ID::arpOn, 1.0f }, { ID::arpMode, 0.0f }, { ID::arpRate, 3.0f },
+        { ID::arpOct, 2.0f }, { ID::arpGate, 0.5f }, { ID::chorus, 1.0f }, { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f },
+        { ID::dlyNote, 5.0f }, { ID::dlyFb, 0.45f }, { ID::dlyMix, 0.3f } });
+    add ("AR Trans Europe", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.5f }, { ID::fCutoff, 3000.0f },
+        { ID::fReso, 0.3f }, { ID::fEnvAmt, 0.3f }, { ID::fD, 0.2f }, { ID::fS, 0.0f }, { ID::arpOn, 1.0f }, { ID::arpMode, 0.0f },
+        { ID::arpRate, 3.0f }, { ID::arpOct, 1.0f }, { ID::arpGate, 0.4f }, { ID::chorus, 1.0f }, { ID::dlyOn, 1.0f },
+        { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f }, { ID::dlyFb, 0.35f }, { ID::dlyMix, 0.22f } });
+    add ("AR Blue Monday Seq", { { ID::o1Saw, 1.0f }, { ID::fCutoff, 3500.0f }, { ID::fReso, 0.35f }, { ID::fEnvAmt, 0.5f },
+        { ID::fD, 0.18f }, { ID::fS, 0.0f }, { ID::arpOn, 1.0f }, { ID::arpMode, 0.0f }, { ID::arpRate, 3.0f }, { ID::arpOct, 1.0f },
+        { ID::arpGate, 0.45f }, { ID::chorus, 0.0f }, { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f },
+        { ID::dlyFb, 0.3f }, { ID::dlyMix, 0.2f } });
+
     // ---------------- FX / MISC ----------------
     add ("FX Noise Sweep", { { ID::noise, 0.8f }, { ID::o1Saw, 0.2f }, { ID::fType, 0.0f }, { ID::fCutoff, 300.0f },
         { ID::fReso, 0.6f }, { ID::fEnvAmt, 0.9f }, { ID::fA, 2.0f }, { ID::fD, 2.0f }, { ID::aA, 1.0f }, { ID::aR, 1.5f }, { ID::chorus, 2.0f } });
@@ -242,6 +348,43 @@ void PresetManager::buildFactory()
         { ID::aA, 0.003f }, { ID::aD, 0.4f }, { ID::aS, 0.0f }, { ID::aR, 0.3f },
         { ID::dlyOn, 1.0f }, { ID::dlyNote, 2.0f }, { ID::dlyFb, 0.75f }, { ID::dlyTone, 2500.0f }, { ID::dlyMix, 0.5f },
         { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.7f }, { ID::rvbMix, 0.3f } });
+
+    add ("FX Ring Bells", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 0.7f }, { ID::o2On, 1.0f }, { ID::o2Pulse, 0.7f },
+        { ID::o2Coarse, 19.0f }, { ID::o2Ring, 0.8f }, { ID::fCutoff, 6000.0f }, { ID::fReso, 0.2f }, { ID::aA, 0.002f },
+        { ID::aD, 1.5f }, { ID::aS, 0.0f }, { ID::aR, 1.2f }, { ID::chorus, 1.0f }, { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.7f },
+        { ID::rvbPre, 20.0f }, { ID::rvbMix, 0.35f } });
+    add ("FX Robot Ring", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 0.8f }, { ID::o1Pw, 0.4f }, { ID::o2On, 1.0f },
+        { ID::o2Pulse, 0.8f }, { ID::o2Coarse, 5.0f }, { ID::o2Ring, 0.7f }, { ID::fType, 1.0f }, { ID::fCutoff, 2500.0f },
+        { ID::fReso, 0.3f }, { ID::lfoPitch, 0.05f }, { ID::lfoRate, 6.0f }, { ID::aS, 0.8f }, { ID::aR, 0.3f }, { ID::chorus, 1.0f } });
+    add ("FX Laser Zap", { { ID::o1Saw, 1.0f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 48.0f }, { ID::pA, 0.001f },
+        { ID::pD, 0.12f }, { ID::pS, 0.0f }, { ID::fCutoff, 6000.0f }, { ID::fReso, 0.3f }, { ID::aA, 0.001f }, { ID::aD, 0.15f },
+        { ID::aS, 0.0f }, { ID::aR, 0.1f }, { ID::chorus, 0.0f }, { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.3f },
+        { ID::dlyMix, 0.2f } });
+    add ("FX Riser", { { ID::o1Saw, 1.0f }, { ID::uniVoices, 4.0f }, { ID::uniDetune, 20.0f }, { ID::uniSpread, 1.0f },
+        { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 36.0f }, { ID::pA, 2.5f }, { ID::pD, 0.5f }, { ID::pS, 1.0f },
+        { ID::fCutoff, 2000.0f }, { ID::fEnvAmt, 0.6f }, { ID::fA, 3.0f }, { ID::aA, 2.5f }, { ID::aS, 1.0f }, { ID::aR, 0.5f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.7f }, { ID::rvbMix, 0.35f } });
+    add ("FX Drop Dive", { { ID::o1Saw, 1.0f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, -36.0f }, { ID::pA, 1.2f },
+        { ID::pD, 0.5f }, { ID::pS, 1.0f }, { ID::fCutoff, 5000.0f }, { ID::aA, 0.01f }, { ID::aS, 0.9f }, { ID::aR, 0.5f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.6f }, { ID::rvbMix, 0.3f } });
+    add ("FX Jarre Sweep", { { ID::o1Saw, 0.8f }, { ID::o1Pulse, 0.4f }, { ID::fCutoff, 400.0f }, { ID::fReso, 0.7f },
+        { ID::fEnvAmt, 0.9f }, { ID::fA, 1.5f }, { ID::fD, 2.0f }, { ID::fS, 0.3f }, { ID::aA, 0.5f }, { ID::aS, 0.7f }, { ID::aR, 1.0f },
+        { ID::chorus, 2.0f }, { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.5f }, { ID::dlyMix, 0.3f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.7f }, { ID::rvbMix, 0.3f } });
+
+    // ---------------- PERCUSSION (pitch env down + click + ring) ----------------
+    add ("PC Analog Kick", { { ID::o1Saw, 0.0f }, { ID::o1Tri, 1.0f }, { ID::o1Octave, -1.0f }, { ID::attackClick, 0.35f },
+        { ID::fCutoff, 2000.0f }, { ID::fReso, 0.1f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 30.0f }, { ID::pA, 0.001f },
+        { ID::pD, 0.1f }, { ID::pS, 0.0f }, { ID::aA, 0.001f }, { ID::aD, 0.22f }, { ID::aS, 0.0f }, { ID::aR, 0.12f }, { ID::chorus, 0.0f } });
+    add ("PC Synth Tom", { { ID::o1Saw, 0.0f }, { ID::o1Tri, 1.0f }, { ID::attackClick, 0.15f }, { ID::fCutoff, 2500.0f },
+        { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 18.0f }, { ID::pA, 0.001f }, { ID::pD, 0.18f }, { ID::pS, 0.0f },
+        { ID::aA, 0.001f }, { ID::aD, 0.4f }, { ID::aS, 0.0f }, { ID::aR, 0.2f }, { ID::chorus, 0.0f } });
+    add ("PC Zap Perc", { { ID::o1Saw, 1.0f }, { ID::attackClick, 0.4f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 48.0f },
+        { ID::pA, 0.001f }, { ID::pD, 0.07f }, { ID::pS, 0.0f }, { ID::fCutoff, 5000.0f }, { ID::fReso, 0.3f },
+        { ID::aA, 0.001f }, { ID::aD, 0.09f }, { ID::aS, 0.0f }, { ID::aR, 0.06f }, { ID::chorus, 0.0f } });
+    add ("PC Cowbell", { { ID::o1Saw, 0.0f }, { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.5f }, { ID::o2On, 1.0f }, { ID::o2Pulse, 1.0f },
+        { ID::o2Coarse, 7.0f }, { ID::o2Ring, 0.3f }, { ID::fType, 4.0f }, { ID::fCutoff, 2600.0f }, { ID::fReso, 0.4f },
+        { ID::aA, 0.001f }, { ID::aD, 0.3f }, { ID::aS, 0.0f }, { ID::aR, 0.15f }, { ID::chorus, 0.0f } });
 
     // ---------------- LEGENDS (v0.6 phase 1 : hommages aux classiques) ----------------
     // Minimoog Model D : 2 "oscs" saw legerement desaccordes, ladder 24 dB pousse par le drive
@@ -328,6 +471,20 @@ void PresetManager::buildFactory()
         { ID::fCutoff, 900.0f }, { ID::fReso, 0.3f }, { ID::fDrive, 2.5f }, { ID::fEnvAmt, 0.55f },
         { ID::fD, 0.2f }, { ID::fS, 0.05f }, { ID::voiceMode, 1.0f }, { ID::notePrio, 1.0f },
         { ID::aA, 0.002f }, { ID::aD, 0.35f }, { ID::aS, 0.4f }, { ID::aR, 0.1f }, { ID::chorus, 0.0f } });
+
+    // ---- LEGENDS 3e vague (v0.7 : sync sweep via pitch env sur DCO2) ----
+    // Prophet-5 hard sync avec balayage : la pitch env fait chanter l'harmonique syncee
+    add ("LG P5 Sync", { { ID::o1Saw, 0.3f }, { ID::o2On, 1.0f }, { ID::o2Sync, 1.0f }, { ID::o2Saw, 1.0f },
+        { ID::pEnvTarget, 0.0f }, { ID::pEnvAmt, 36.0f }, { ID::pA, 0.002f }, { ID::pD, 0.6f }, { ID::pS, 0.0f },
+        { ID::fCutoff, 3800.0f }, { ID::fReso, 0.2f }, { ID::fDrive, 2.0f }, { ID::fEnvAmt, 0.2f }, { ID::voiceMode, 2.0f },
+        { ID::aA, 0.005f }, { ID::aS, 0.85f }, { ID::aR, 0.25f }, { ID::chorus, 0.0f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.5f }, { ID::rvbMix, 0.2f } });
+    // Gary Numan / The Cars : stab sync agressif, intervalle de quinte + sweep court
+    add ("LG Cars Sync", { { ID::o1Saw, 0.0f }, { ID::o2On, 1.0f }, { ID::o2Sync, 1.0f }, { ID::o2Saw, 1.0f },
+        { ID::o2Coarse, 7.0f }, { ID::o2Octave, 1.0f }, { ID::pEnvTarget, 0.0f }, { ID::pEnvAmt, 24.0f }, { ID::pA, 0.001f },
+        { ID::pD, 0.3f }, { ID::pS, 0.2f }, { ID::fCutoff, 4000.0f }, { ID::fReso, 0.3f }, { ID::fDrive, 2.0f },
+        { ID::aA, 0.004f }, { ID::aD, 0.4f }, { ID::aS, 0.5f }, { ID::aR, 0.2f }, { ID::chorus, 0.0f },
+        { ID::dlyOn, 1.0f }, { ID::dlyNote, 3.0f }, { ID::dlyFb, 0.35f }, { ID::dlyMix, 0.2f } });
 }
 
 void PresetManager::applyValues (const std::vector<std::pair<juce::String, float>>& vals)
