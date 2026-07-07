@@ -24,6 +24,8 @@ public:
     void stopNote (float velocity, bool allowTailOff) override;
     void pitchWheelMoved (int newValue) override;
     void controllerMoved (int controller, int value) override;
+    void channelPressureChanged (int newValue) override;   // channel aftertouch
+    void aftertouchChanged (int newValue) override;         // poly aftertouch
     void renderNextBlock (juce::AudioBuffer<float>& output, int startSample, int numSamples) override;
 
     // Legato (single-trigger) pitch change: retune without restarting the envelopes.
@@ -51,6 +53,7 @@ private:
         std::atomic<float>* aA; std::atomic<float>* aD; std::atomic<float>* aS; std::atomic<float>* aR;
         std::atomic<float>* feA; std::atomic<float>* feD; std::atomic<float>* feS; std::atomic<float>* feR;
         std::atomic<float>* lfoRate; std::atomic<float>* lfoShape; std::atomic<float>* lfoDelay; std::atomic<float>* lfoPitch;
+        std::atomic<float>* atCutoff; std::atomic<float>* atVib; std::atomic<float>* attackClick;
     } p;
 
     juce::AudioProcessorValueTreeState& state;
@@ -82,6 +85,8 @@ private:
     float  velLevel   = 1.0f;
     float  pitchWheelNorm = 0.0f;
     float  modWheel = 0.0f;
+    float  aftertouch = 0.0f;   // 0..1, from channel or poly pressure
+    float  clickAmp = 0.0f;     // attack-transient burst envelope (armed at note-on)
 
     std::atomic<float>* glideSrc = nullptr;
 

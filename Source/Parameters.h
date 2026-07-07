@@ -103,6 +103,11 @@ namespace ID
 
     // Chord memory
     inline constexpr auto chordOn = "chordOn";
+
+    // Aftertouch routing + attack transient
+    inline constexpr auto atCutoff    = "atCutoff";
+    inline constexpr auto atVib       = "atVib";
+    inline constexpr auto attackClick = "attackClick";
 }
 
 inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
@@ -234,6 +239,11 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
 
     // ---- Chord memory ----
     p.push_back (std::make_unique<AudioParameterBool> (pid (ID::chordOn), "Chord On", false));
+
+    // ---- Aftertouch routing + attack transient ----
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::atCutoff),    "AT -> Cutoff",  lin (0.0f, 1.0f), 0.0f));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::atVib),       "AT -> Vibrato", lin (0.0f, 1.0f), 0.0f));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::attackClick), "Attack Click",  lin (0.0f, 1.0f), 0.0f));
 
     return { p.begin(), p.end() };
 }

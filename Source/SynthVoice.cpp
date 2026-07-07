@@ -85,6 +85,9 @@ UBVoice::UBVoice (juce::AudioProcessorValueTreeState& s) : state (s)
     p.lfoShape = state.getRawParameterValue (ID::lfoShape);
     p.lfoDelay = state.getRawParameterValue (ID::lfoDelay);
     p.lfoPitch = state.getRawParameterValue (ID::lfoPitch);
+    p.atCutoff    = state.getRawParameterValue (ID::atCutoff);
+    p.atVib       = state.getRawParameterValue (ID::atVib);
+    p.attackClick = state.getRawParameterValue (ID::attackClick);
 }
 
 void UBVoice::prepare (double sampleRate, int blockSize)
@@ -131,6 +134,7 @@ void UBVoice::startNote (int midiNote, float velocity, juce::SynthesiserSound*, 
 
     lfoDelaySamplesDone = 0;
     hpfPrevIn[0] = hpfPrevIn[1] = hpfPrevOut[0] = hpfPrevOut[1] = 0.0f;
+    clickAmp = 1.0f;   // arm the attack-transient burst
 }
 
 void UBVoice::stopNote (float, bool allowTailOff)
@@ -165,6 +169,16 @@ void UBVoice::controllerMoved (int controller, int value)
 {
     if (controller == 1) // mod wheel -> extra vibrato
         modWheel = (float) value / 127.0f;
+}
+
+void UBVoice::channelPressureChanged (int newValue)
+{
+    aftertouch = (float) newValue / 127.0f;
+}
+
+void UBVoice::aftertouchChanged (int newValue)
+{
+    aftertouch = (float) newValue / 127.0f;
 }
 
 void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample, int numSamples)
@@ -237,6 +251,14 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
     const float lfoPit  = p.lfoPitch->load();
     const float pbRange = p.pbRange->load();
 
+    // aftertouch destinations + attack transient (aftertouch is constant over
+    // the block; the click burst decays per-sample from its armed level)
+    const float atCutAmt = p.atCutoff->load();
+    const float atVibAmt = p.atVib->load();
+    const float clickAmt = p.attackClick->load();
+    const float atCutOct = atCutAmt * aftertouch * 4.0f;                    // up to +4 octaves
+    const float clickDecay = std::exp (-1.0f / (0.008f * (float) sr));      // ~8 ms burst
+
     // fType: 0 LP24, 1 LP12, 2 HP24, 3 HP12, 4 BP24, 5 BP12.
     using ST = juce::dsp::StateVariableTPTFilterType;
     const ST svfType = fType < 2 ? ST::lowpass : (fType < 4 ? ST::highpass : ST::bandpass);
@@ -266,7 +288,7 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
     }
 
     const float pitchBendFactor = std::pow (2.0f, pitchWheelNorm * pbRange / 12.0f);
-    const float vibDepth = juce::jlimit (0.0f, 1.0f, lfoPit + modWheel * 0.5f);
+    const float vibDepth = juce::jlimit (0.0f, 1.0f, lfoPit + modWheel * 0.5f + aftertouch * atVibAmt * 0.5f);
 
     const int numCh = output.getNumChannels();
 
@@ -344,8 +366,10 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
         }
 
         const float ns = noiseL * (rng.nextFloat() * 2.0f - 1.0f);  // noise stays centred
-        mixL = mixL * 0.3f + ns * 0.3f;
-        mixR = mixR * 0.3f + ns * 0.3f;
+        const float clk = clickAmt * clickAmp * (rng.nextFloat() * 2.0f - 1.0f); // attack burst
+        clickAmp *= clickDecay;
+        mixL = mixL * 0.3f + (ns + clk) * 0.3f;
+        mixR = mixR * 0.3f + (ns + clk) * 0.3f;
 
         // ---- HPF (per channel) ----
         if (hpfOn)
@@ -364,7 +388,7 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
         // velOct: full velocity keeps the preset brightness, soft notes darken
         const float keyOct = keyTrk * (float) (noteNumber - 60) / 12.0f;
         const float velOct = velAmt * 3.0f * (velLevel - 1.0f);
-        float cutoff = baseCutoff * std::pow (2.0f, envAmt * 5.0f * fe + keyOct + lfoToF * lfo * 3.0f + velOct);
+        float cutoff = baseCutoff * std::pow (2.0f, envAmt * 5.0f * fe + keyOct + lfoToF * lfo * 3.0f + velOct + atCutOct);
         cutoff = juce::jlimit (20.0f, 20000.0f, cutoff);
 
         // drive: soft saturation for the "more aggressive" filter character

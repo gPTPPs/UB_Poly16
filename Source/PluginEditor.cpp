@@ -106,6 +106,7 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     makeKnob    (secFilter, ID::fKeyTrack, "KeyTrk");
     makeKnob    (secFilter, ID::fLfo,      "LFO Amt");
     makeKnob    (secFilter, ID::fVelAmt,   "Vel");
+    makeKnob    (secFilter, ID::atCutoff,  "AT>Cut");
 
     makeCombo   (secLfo, ID::lfoShape, "Shape");
     secLfo.addBreak();
@@ -113,11 +114,14 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     makeKnob    (secLfo, ID::lfoDelay, "Delay");
     secLfo.addBreak();
     makeKnob    (secLfo, ID::lfoPitch, "Vibrato");
+    makeKnob    (secLfo, ID::atVib,    "AT>Vib");
 
     makeVSlider (secAmp, ID::aA, "A");
     makeVSlider (secAmp, ID::aD, "D");
     makeVSlider (secAmp, ID::aS, "S");
     makeVSlider (secAmp, ID::aR, "R");
+    secAmp.addBreak();
+    makeKnob    (secAmp, ID::attackClick, "Click");
 
     makeVSlider (secFenv, ID::fA, "A");
     makeVSlider (secFenv, ID::fD, "D");
