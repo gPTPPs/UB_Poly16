@@ -119,6 +119,8 @@ private:
 
     void refreshPresetList();
     void savePresetDialog();
+    void deletePresetDialog();
+    void renamePresetDialog();
     void fixWindowPosition();
 
     UBAudioProcessor& proc;
@@ -127,6 +129,7 @@ private:
     // preset bar
     juce::ComboBox presetBox;
     juce::TextButton prevBtn { "<" }, nextBtn { ">" }, saveBtn { "Save" },
+                     renBtn { "Ren" }, delBtn { "Del" },
                      initBtn { "Init" }, importBtn { "Import" }, exportBtn { "Export" },
                      audioBtn { "Audio/MIDI" };
     bool isStandalone = false;

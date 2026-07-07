@@ -21,6 +21,8 @@ public:
     void loadUser (const juce::String& name);
     bool saveUserPreset (const juce::String& name);   // overwrites if exists
     bool deleteUserPreset (const juce::String& name);
+    bool renameUserPreset (const juce::String& oldName, const juce::String& newName);
+    bool isUserPreset (const juce::String& name) const;   // true if a <name>.ubp exists
 
     void loadByDisplayName (const juce::String& displayName); // "FACTORY: x" / "x"
     juce::StringArray getAllDisplayNames() const;

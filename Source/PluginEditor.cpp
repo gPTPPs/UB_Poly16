@@ -21,7 +21,7 @@ UBEditor::UBEditor (UBAudioProcessor& p)
 
     isStandalone = (proc.wrapperType == juce::AudioProcessor::wrapperType_Standalone);
 
-    for (auto* b : { &prevBtn, &nextBtn, &saveBtn, &initBtn, &importBtn, &exportBtn, &audioBtn })
+    for (auto* b : { &prevBtn, &nextBtn, &saveBtn, &renBtn, &delBtn, &initBtn, &importBtn, &exportBtn, &audioBtn })
         addAndMakeVisible (b);
     audioBtn.setVisible (isStandalone);   // a DAW host provides its own audio/MIDI setup
 
@@ -37,6 +37,8 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     nextBtn.onClick   = [this] { proc.presets.loadNext(); };
     initBtn.onClick   = [this] { proc.presets.initPatch(); };
     saveBtn.onClick   = [this] { savePresetDialog(); };
+    renBtn.onClick    = [this] { renamePresetDialog(); };
+    delBtn.onClick    = [this] { deletePresetDialog(); };
 
     exportBtn.onClick = [this]
     {
@@ -430,6 +432,11 @@ void UBEditor::refreshPresetList()
             presetBox.setSelectedId (i + 1, juce::dontSendNotification);
             break;
         }
+
+    // Rename/Delete only apply to user presets (factory presets are read-only)
+    const bool isUser = proc.presets.isUserPreset (cur);
+    renBtn.setEnabled (isUser);
+    delBtn.setEnabled (isUser);
 }
 
 void UBEditor::savePresetDialog()
@@ -449,6 +456,57 @@ void UBEditor::savePresetDialog()
                     proc.presets.saveUserPreset (name);
                     refreshPresetList();
                 }
+            }
+            delete aw;
+        }), false);
+}
+
+void UBEditor::renamePresetDialog()
+{
+    const auto oldName = proc.presets.getCurrentName();
+    if (! proc.presets.isUserPreset (oldName))   // factory presets are read-only
+        return;
+
+    auto* aw = new juce::AlertWindow ("Rename preset", "New name:", juce::MessageBoxIconType::NoIcon);
+    aw->addTextEditor ("name", oldName);
+    aw->addButton ("Rename", 1, juce::KeyPress (juce::KeyPress::returnKey));
+    aw->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    aw->enterModalState (true, juce::ModalCallbackFunction::create (
+        [this, aw, oldName] (int result)
+        {
+            if (result == 1)
+            {
+                auto newName = aw->getTextEditorContents ("name").trim();
+                if (newName.isNotEmpty() && newName != oldName
+                    && ! proc.presets.renameUserPreset (oldName, newName))
+                    juce::NativeMessageBox::showMessageBoxAsync (
+                        juce::MessageBoxIconType::WarningIcon, "Rename preset",
+                        "Could not rename (a preset with that name may already exist).");
+                refreshPresetList();
+            }
+            delete aw;
+        }), false);
+}
+
+void UBEditor::deletePresetDialog()
+{
+    const auto name = proc.presets.getCurrentName();
+    if (! proc.presets.isUserPreset (name))      // factory presets are read-only
+        return;
+
+    auto* aw = new juce::AlertWindow ("Delete preset",
+                                      "Delete user preset \"" + name + "\" ?\nThis cannot be undone.",
+                                      juce::MessageBoxIconType::WarningIcon);
+    aw->addButton ("Delete", 1, juce::KeyPress (juce::KeyPress::returnKey));
+    aw->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    aw->enterModalState (true, juce::ModalCallbackFunction::create (
+        [this, aw, name] (int result)
+        {
+            if (result == 1)
+            {
+                proc.presets.deleteUserPreset (name);
+                proc.presets.initPatch();        // leave a valid patch selected
+                refreshPresetList();
             }
             delete aw;
         }), false);
@@ -476,6 +534,8 @@ void UBEditor::resized()
         fb.items.add (item (presetBox, 1.0f, 160));
         fb.items.add (item (nextBtn,   0.0f, 32));
         fb.items.add (item (saveBtn,   0.0f, 64));
+        fb.items.add (item (renBtn,    0.0f, 48));
+        fb.items.add (item (delBtn,    0.0f, 48));
         fb.items.add (item (initBtn,   0.0f, 56));
         fb.items.add (item (importBtn, 0.0f, 72));
         fb.items.add (item (exportBtn, 0.0f, 72));

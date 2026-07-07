@@ -399,6 +399,26 @@ bool PresetManager::deleteUserPreset (const juce::String& name)
     return userDir.getChildFile (name + presetExt).deleteFile();
 }
 
+bool PresetManager::renameUserPreset (const juce::String& oldName, const juce::String& newName)
+{
+    if (newName.isEmpty() || oldName == newName)
+        return false;
+
+    auto src = userDir.getChildFile (oldName + presetExt);
+    auto dst = userDir.getChildFile (newName + presetExt);
+    if (! src.existsAsFile() || dst.existsAsFile())   // never clobber an existing preset
+        return false;
+
+    const bool ok = src.moveFileTo (dst);
+    if (ok) setCurrent (newName);
+    return ok;
+}
+
+bool PresetManager::isUserPreset (const juce::String& name) const
+{
+    return getUserNames().contains (name);
+}
+
 juce::StringArray PresetManager::getFactoryNames() const
 {
     juce::StringArray a;
