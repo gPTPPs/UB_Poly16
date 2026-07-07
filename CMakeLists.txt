@@ -28,6 +28,8 @@ juce_add_plugin(UB_Poly16
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD FALSE
     FORMATS                 VST3 Standalone
+    ICON_BIG                "${CMAKE_CURRENT_SOURCE_DIR}/assets/icon.png"
+    ICON_SMALL              "${CMAKE_CURRENT_SOURCE_DIR}/assets/icon_small.png"
     PRODUCT_NAME            "UB_Poly16")
 
 juce_generate_juce_header(UB_Poly16)
