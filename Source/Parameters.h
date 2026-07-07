@@ -23,6 +23,7 @@ namespace ID
     // DCO 2
     inline constexpr auto o2On     = "o2On";
     inline constexpr auto o2Octave = "o2Octave";
+    inline constexpr auto o2Coarse = "o2Coarse";   // DCO2 coarse tune, +/-24 semitones
     inline constexpr auto o2Detune = "o2Detune";
     inline constexpr auto o2Saw    = "o2Saw";
     inline constexpr auto o2Tri    = "o2Tri";
@@ -31,6 +32,7 @@ namespace ID
     inline constexpr auto o2Pw     = "o2Pw";
     inline constexpr auto o2Pwm    = "o2Pwm";
     inline constexpr auto o2Sync   = "o2Sync";   // hard sync: DCO1 master resets DCO2
+    inline constexpr auto o2Ring   = "o2Ring";   // ring modulation DCO1 x DCO2
 
     inline constexpr auto noise    = "noise";
 
@@ -108,6 +110,14 @@ namespace ID
     inline constexpr auto atCutoff    = "atCutoff";
     inline constexpr auto atVib       = "atVib";
     inline constexpr auto attackClick = "attackClick";
+
+    // Pitch envelope (sync sweep when targeting DCO2 only)
+    inline constexpr auto pEnvAmt    = "pEnvAmt";
+    inline constexpr auto pEnvTarget = "pEnvTarget";
+    inline constexpr auto pA = "pA";
+    inline constexpr auto pD = "pD";
+    inline constexpr auto pS = "pS";
+    inline constexpr auto pR = "pR";
 }
 
 inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
@@ -151,6 +161,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     // ---- DCO 2 ----
     p.push_back (std::make_unique<AudioParameterBool>  (pid (ID::o2On), "DCO2 On", false));
     p.push_back (std::make_unique<AudioParameterInt>   (pid (ID::o2Octave), "DCO2 Octave", -2, 2, 0));
+    p.push_back (std::make_unique<AudioParameterInt>   (pid (ID::o2Coarse), "DCO2 Coarse", -24, 24, 0));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::o2Detune), "DCO2 Detune", lin (-50.0f, 50.0f), 7.0f));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::o2Saw),   "DCO2 Saw",   lin (0.0f, 1.0f), 0.0f));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::o2Tri),   "DCO2 Tri",   lin (0.0f, 1.0f), 0.0f));
@@ -159,6 +170,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::o2Pw),    "DCO2 PW",    lin (0.05f, 0.95f), 0.5f));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::o2Pwm),   "DCO2 PWM",   lin (0.0f, 0.45f), 0.0f));
     p.push_back (std::make_unique<AudioParameterBool>  (pid (ID::o2Sync),  "DCO2 Hard Sync", false));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::o2Ring),  "DCO2 Ring Mod", lin (0.0f, 1.0f), 0.0f));
 
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::noise), "Noise", lin (0.0f, 1.0f), 0.0f));
 
@@ -244,6 +256,15 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::atCutoff),    "AT -> Cutoff",  lin (0.0f, 1.0f), 0.0f));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::atVib),       "AT -> Vibrato", lin (0.0f, 1.0f), 0.0f));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::attackClick), "Attack Click",  lin (0.0f, 1.0f), 0.0f));
+
+    // ---- Pitch envelope ----
+    p.push_back (std::make_unique<AudioParameterFloat>  (pid (ID::pEnvAmt), "P.Env Amount", lin (-48.0f, 48.0f), 0.0f)); // semitones
+    p.push_back (std::make_unique<AudioParameterChoice> (pid (ID::pEnvTarget), "P.Env Target",
+        StringArray { "DCO2", "Both" }, 0));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::pA), "P.Env Attack",  timeR(), 0.01f));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::pD), "P.Env Decay",   timeR(), 0.30f));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::pS), "P.Env Sustain", lin (0.0f, 1.0f), 0.0f));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::pR), "P.Env Release", timeR(), 0.20f));
 
     return { p.begin(), p.end() };
 }

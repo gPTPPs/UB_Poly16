@@ -136,7 +136,8 @@ private:
 
     // sections
     Section secDco1 { "DCO 1" }, secDco2 { "DCO 2" }, secFilter { "FILTER" }, secLfo { "LFO" },
-            secAmp { "AMP ENV" }, secFenv { "FILTER ENV" }, secArp { "ARP" }, secGlobal { "GLOBAL" },
+            secAmp { "AMP ENV" }, secFenv { "FILTER ENV" }, secPenv { "PITCH ENV" },
+            secArp { "ARP" }, secGlobal { "GLOBAL" },
             secDelay { "DELAY" }, secReverb { "REVERB" }, secUni { "UNISON" }, secChord { "CHORD" },
             secScope { "SCOPE" };
 

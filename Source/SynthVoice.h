@@ -42,7 +42,7 @@ private:
         std::atomic<float>* glide; std::atomic<float>* pbRange;
         std::atomic<float>* o1Octave; std::atomic<float>* o1Saw; std::atomic<float>* o1Tri; std::atomic<float>* o1Pulse;
         std::atomic<float>* o1Sub; std::atomic<float>* o1Pw; std::atomic<float>* o1Pwm;
-        std::atomic<float>* o2On; std::atomic<float>* o2Octave; std::atomic<float>* o2Detune;
+        std::atomic<float>* o2On; std::atomic<float>* o2Octave; std::atomic<float>* o2Coarse; std::atomic<float>* o2Detune;
         std::atomic<float>* o2Saw; std::atomic<float>* o2Tri; std::atomic<float>* o2Pulse; std::atomic<float>* o2Sub;
         std::atomic<float>* o2Pw; std::atomic<float>* o2Pwm; std::atomic<float>* o2Sync;
         std::atomic<float>* noise; std::atomic<float>* hpf;
@@ -54,11 +54,13 @@ private:
         std::atomic<float>* feA; std::atomic<float>* feD; std::atomic<float>* feS; std::atomic<float>* feR;
         std::atomic<float>* lfoRate; std::atomic<float>* lfoShape; std::atomic<float>* lfoDelay; std::atomic<float>* lfoPitch;
         std::atomic<float>* atCutoff; std::atomic<float>* atVib; std::atomic<float>* attackClick;
+        std::atomic<float>* o2Ring; std::atomic<float>* pEnvAmt; std::atomic<float>* pEnvTarget;
+        std::atomic<float>* pA; std::atomic<float>* pD; std::atomic<float>* pS; std::atomic<float>* pR;
     } p;
 
     juce::AudioProcessorValueTreeState& state;
 
-    juce::ADSR ampEnv, filtEnv;
+    juce::ADSR ampEnv, filtEnv, pitchEnv;
     // VCF: two TPT state-variable stages. One stage = 12 dB/oct, both cascaded = 24 dB/oct.
     juce::dsp::StateVariableTPTFilter<float> svfA, svfB;
 

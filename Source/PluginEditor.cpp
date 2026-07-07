@@ -67,7 +67,7 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     };
 
     // ---- sections ----
-    for (auto* s : { &secDco1, &secDco2, &secFilter, &secLfo, &secAmp, &secFenv, &secArp, &secGlobal,
+    for (auto* s : { &secDco1, &secDco2, &secFilter, &secLfo, &secAmp, &secFenv, &secPenv, &secArp, &secGlobal,
                      &secDelay, &secReverb, &secUni, &secChord, &secScope })
         addAndMakeVisible (s);
 
@@ -90,10 +90,12 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     makeVSlider (secDco2, ID::o2Sub,    "Sub");
     secDco2.addBreak();
     makeKnob    (secDco2, ID::o2Octave, "Oct");
+    makeKnob    (secDco2, ID::o2Coarse, "Coarse");
     makeKnob    (secDco2, ID::o2Detune, "Detune");
     makeKnob    (secDco2, ID::o2Pw,     "PW");
     makeKnob    (secDco2, ID::o2Pwm,    "PWM");
     makeToggle  (secDco2, ID::o2Sync,   "Sync", 64);
+    makeKnob    (secDco2, ID::o2Ring,   "Ring");
 
     makeCombo   (secFilter, ID::fType,     "Type");
     makeCombo   (secFilter, ID::hpf,       "HPF");
@@ -127,6 +129,14 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     makeVSlider (secFenv, ID::fD, "D");
     makeVSlider (secFenv, ID::fS, "S");
     makeVSlider (secFenv, ID::fR, "R");
+
+    makeVSlider (secPenv, ID::pA, "A");
+    makeVSlider (secPenv, ID::pD, "D");
+    makeVSlider (secPenv, ID::pS, "S");
+    makeVSlider (secPenv, ID::pR, "R");
+    secPenv.addBreak();
+    makeKnob    (secPenv, ID::pEnvAmt,    "Amount");
+    makeCombo   (secPenv, ID::pEnvTarget, "Target");
 
     makeToggle  (secArp, ID::arpOn,   "Arp On", 84);
     makeToggle  (secArp, ID::arpHold, "Hold", 70);
@@ -191,7 +201,7 @@ UBEditor::UBEditor (UBAudioProcessor& p)
 
     setResizable (true, true);
     setResizeLimits (1000, 740, 1800, 1300);
-    setSize (1220, 960);
+    setSize (1560, 960);
 
     learnLabel.setJustificationType (juce::Justification::centredRight);
     learnLabel.setColour (juce::Label::textColourId, UBColours::accent);
@@ -402,6 +412,7 @@ void UBEditor::refreshPresetList()
         if (pfx == "ST") return "STRINGS";
         if (pfx == "AR") return "ARP";
         if (pfx == "FX") return "FX";
+        if (pfx == "PC") return "PERCUSSION";
         if (pfx == "LG") return "LEGENDS";
         return {};   // Init & friends live at the top, before the first heading
     };
@@ -568,8 +579,8 @@ void UBEditor::resized()
         fb.performLayout (r);
     };
 
-    layoutRow (row1, { { &secDco1, 1.0f }, { &secDco2, 1.5f }, { &secFilter, 1.3f }, { &secLfo, 0.8f } });
-    layoutRow (row2, { { &secAmp, 0.75f }, { &secFenv, 0.75f }, { &secArp, 1.45f }, { &secGlobal, 1.05f } });
+    layoutRow (row1, { { &secDco1, 1.0f }, { &secDco2, 1.8f }, { &secFilter, 1.2f }, { &secLfo, 0.8f } });
+    layoutRow (row2, { { &secAmp, 0.85f }, { &secFenv, 0.85f }, { &secPenv, 0.95f }, { &secArp, 1.3f }, { &secGlobal, 1.05f } });
     layoutRow (row3, { { &secUni, 0.62f }, { &secChord, 0.72f }, { &secDelay, 1.25f }, { &secReverb, 0.9f },
                        { &secScope, 0.72f } });
 }

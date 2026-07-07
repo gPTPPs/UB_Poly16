@@ -52,6 +52,7 @@ UBVoice::UBVoice (juce::AudioProcessorValueTreeState& s) : state (s)
     p.o1Pwm    = state.getRawParameterValue (ID::o1Pwm);
     p.o2On     = state.getRawParameterValue (ID::o2On);
     p.o2Octave = state.getRawParameterValue (ID::o2Octave);
+    p.o2Coarse = state.getRawParameterValue (ID::o2Coarse);
     p.o2Detune = state.getRawParameterValue (ID::o2Detune);
     p.o2Saw    = state.getRawParameterValue (ID::o2Saw);
     p.o2Tri    = state.getRawParameterValue (ID::o2Tri);
@@ -88,6 +89,13 @@ UBVoice::UBVoice (juce::AudioProcessorValueTreeState& s) : state (s)
     p.atCutoff    = state.getRawParameterValue (ID::atCutoff);
     p.atVib       = state.getRawParameterValue (ID::atVib);
     p.attackClick = state.getRawParameterValue (ID::attackClick);
+    p.o2Ring     = state.getRawParameterValue (ID::o2Ring);
+    p.pEnvAmt    = state.getRawParameterValue (ID::pEnvAmt);
+    p.pEnvTarget = state.getRawParameterValue (ID::pEnvTarget);
+    p.pA = state.getRawParameterValue (ID::pA);
+    p.pD = state.getRawParameterValue (ID::pD);
+    p.pS = state.getRawParameterValue (ID::pS);
+    p.pR = state.getRawParameterValue (ID::pR);
 }
 
 void UBVoice::prepare (double sampleRate, int blockSize)
@@ -100,6 +108,7 @@ void UBVoice::prepare (double sampleRate, int blockSize)
     svfB.reset();
     ampEnv.setSampleRate (sampleRate);
     filtEnv.setSampleRate (sampleRate);
+    pitchEnv.setSampleRate (sampleRate);
 }
 
 bool UBVoice::canPlaySound (juce::SynthesiserSound* s)
@@ -129,8 +138,10 @@ void UBVoice::startNote (int midiNote, float velocity, juce::SynthesiserSound*, 
 
     ampEnv.setParameters  ({ p.aA->load(),  p.aD->load(),  p.aS->load(),  p.aR->load() });
     filtEnv.setParameters ({ p.feA->load(), p.feD->load(), p.feS->load(), p.feR->load() });
+    pitchEnv.setParameters ({ p.pA->load(), p.pD->load(), p.pS->load(), p.pR->load() });
     ampEnv.noteOn();
     filtEnv.noteOn();
+    pitchEnv.noteOn();
 
     lfoDelaySamplesDone = 0;
     hpfPrevIn[0] = hpfPrevIn[1] = hpfPrevOut[0] = hpfPrevOut[1] = 0.0f;
@@ -143,11 +154,13 @@ void UBVoice::stopNote (float, bool allowTailOff)
     {
         ampEnv.noteOff();
         filtEnv.noteOff();
+        pitchEnv.noteOff();
     }
     else
     {
         ampEnv.reset();
         filtEnv.reset();
+        pitchEnv.reset();
         clearCurrentNote();
     }
 }
@@ -191,6 +204,7 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
     // ---- per-block parameter snapshot ----
     ampEnv.setParameters  ({ p.aA->load(),  p.aD->load(),  p.aS->load(),  p.aR->load() });
     filtEnv.setParameters ({ p.feA->load(), p.feD->load(), p.feS->load(), p.feR->load() });
+    pitchEnv.setParameters ({ p.pA->load(), p.pD->load(), p.pS->load(), p.pR->load() });
 
     const int   o1Oct = (int) p.o1Octave->load();
     const int   o2Oct = (int) p.o2Octave->load();
@@ -200,8 +214,15 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
     const bool  syncOn = p.o2Sync->load() > 0.5f;
     const float o2SawL = p.o2Saw->load(),  o2TriL = p.o2Tri->load(), o2PulL = p.o2Pulse->load(), o2SubL = p.o2Sub->load();
     const float o2PwBase = p.o2Pw->load(), o2PwmD = p.o2Pwm->load();
-    const float o2DetuneRatio = std::pow (2.0f, p.o2Detune->load() / 1200.0f);
+    // DCO2 tuning: coarse (semitones) + fine detune (cents) folded into one ratio
+    const float o2TuneRatio = std::pow (2.0f, (float) (int) p.o2Coarse->load() / 12.0f
+                                              + p.o2Detune->load() / 1200.0f);
+    const float ringAmt = p.o2Ring->load();
     const float noiseL = p.noise->load();
+
+    // pitch envelope: amount in semitones, target DCO2 only (sync sweep) or both
+    const float pEnvSemi   = p.pEnvAmt->load();
+    const bool  pEnvBoth   = p.pEnvTarget->load() > 0.5f;
 
     // ---- unison setup: detune ratio + constant-power pan per sub-voice ----
     const int   uniN   = juce::jlimit (1, maxUnison, 1 + (int) p.uniVoices->load());
@@ -323,8 +344,10 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
 
         // ---- pitch ----
         const double vib = std::pow (2.0, (double) (vibDepth * lfo) * (2.0 / 12.0)); // up to +/-2 semis
-        const double f1 = currentFreq * std::pow (2.0, o1Oct) * pitchBendFactor * vib;
-        const double f2 = currentFreq * std::pow (2.0, o2Oct) * o2DetuneRatio * pitchBendFactor * vib;
+        const float  pe   = pitchEnv.getNextSample();
+        const double pMul = std::pow (2.0, (double) (pEnvSemi * pe) / 12.0);
+        const double f1 = currentFreq * std::pow (2.0, o1Oct) * pitchBendFactor * vib * (pEnvBoth ? pMul : 1.0);
+        const double f2 = currentFreq * std::pow (2.0, o2Oct) * o2TuneRatio * pitchBendFactor * vib * pMul;
 
         // ---- DCOs, one pass per unison sub-voice, panned into L/R ----
         const float pw1 = juce::jlimit (0.05f, 0.95f, o1PwBase + o1PwmD * lfo);
@@ -339,11 +362,12 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
             advance (phase1[k], inc1);
             advance (subPhase1[k], subInc1);
             const bool wrapped1 = phase1[k] < inc1;   // master cycle restarted this sample
-            float s = o1SawL * sawSample (phase1[k], inc1)
-                    + o1TriL * triSample (phase1[k])
-                    + o1PulL * pulseSample (phase1[k], inc1, pw1)
-                    + o1SubL * pulseSample (subPhase1[k], subInc1, 0.5f);
+            float s1 = o1SawL * sawSample (phase1[k], inc1)
+                     + o1TriL * triSample (phase1[k])
+                     + o1PulL * pulseSample (phase1[k], inc1, pw1)
+                     + o1SubL * pulseSample (subPhase1[k], subInc1, 0.5f);
 
+            float s2 = 0.0f;
             if (o2On)
             {
                 const double f2k = f2 * detRatio[k];
@@ -355,12 +379,14 @@ void UBVoice::renderNextBlock (juce::AudioBuffer<float>& output, int startSample
                 // wrap position (sub-osc 2 stays free-running)
                 if (syncOn && wrapped1 && inc1 > 0.0)
                     phase2[k] = (phase1[k] / inc1) * inc2;
-                s += o2SawL * sawSample (phase2[k], inc2)
+                s2 = o2SawL * sawSample (phase2[k], inc2)
                    + o2TriL * triSample (phase2[k])
                    + o2PulL * pulseSample (phase2[k], inc2, pw2)
                    + o2SubL * pulseSample (subPhase2[k], subInc2, 0.5f);
             }
 
+            // ring modulation blends the DCO1 x DCO2 product on top of the mix
+            const float s = s1 + s2 + ringAmt * (s1 * s2);
             mixL += s * gainL[k];
             mixR += s * gainR[k];
         }
