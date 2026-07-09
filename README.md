@@ -9,19 +9,26 @@ A tribute by THE UNBoRN / [RetroVault](https://retrovault.be).
 ## Features
 
 - **2 DCOs** per voice: polyBLEP saw & pulse (PW + PWM), triangle, sub-oscillator, noise
-- **Hard sync** DCO1 → DCO2
+- **Hard sync** and **ring modulation** (DCO1 → DCO2), DCO2 coarse tune (±24 semitones)
 - Juno-style non-resonant **HPF** (4 positions) + multimode **VCF**
   (LP/HP/BP, 12 & 24 dB/oct, drive), env / LFO / velocity / keytrack modulation
-- 2 ADSR envelopes (amp + filter), LFO (tri/sine/saw/square/S&H) with delay
+- 3 ADSR envelopes (amp, filter, **pitch** — for sync sweeps), LFO (tri/sine/saw/square/S&H) with delay
+- **Aftertouch** → cutoff / vibrato, and an attack-click transient
 - **Unison** up to 7 voices, JP-8000-style detune curve with stereo spread
 - **Voice modes**: Poly / Mono (retrigger + note memory) / Legato (single-trigger),
   with Last / Low / High note priority and cross-voice portamento
 - **Chord memory** (learn a chord, play it with one key) and per-knob **MIDI Learn**
-- Arpeggiator (5 modes, host-sync or internal tempo)
+- **Arpeggiator with a 16-step groove sequencer** — per-step on/off, accent, tie and
+  ratchet, global swing, host-PPQ phase-lock, and 9 note orders
 - Master FX: Juno-style chorus (I/II/I+II), tempo-synced stereo/ping-pong delay, reverb
-- Oscilloscope, **89 factory presets** (including a "Legends" bank of classic-synth
-  homages), user presets + bank import/export
-- Resizable custom GUI
+- Oscilloscope
+- **Preset browser** with categories, live search and favourites — **131 factory presets**
+  (including a "Legends" bank of classic-synth homages), user presets + bank import/export
+- Resizable custom GUI (azur / mauve theme)
+
+The built-in preset browser:
+
+![Preset browser](docs/browser.png)
 
 ## Building (Windows)
 
