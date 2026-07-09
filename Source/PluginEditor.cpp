@@ -276,7 +276,7 @@ void UBEditor::fixWindowPosition()
     if (disp == nullptr) disp = displays.getPrimaryDisplay();
     if (disp == nullptr) return;
 
-    const auto area = disp->userArea;
+    const auto area = disp->userBounds.toNearestInt();
     const int x = area.getX() + juce::jmax (0, (area.getWidth()  - wb.getWidth())  / 2);
     const int y = area.getY() + juce::jmax (0, (area.getHeight() - wb.getHeight()) / 2);
     top->setTopLeftPosition (x, y);
