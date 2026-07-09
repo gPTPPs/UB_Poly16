@@ -8,13 +8,47 @@ PresetManager::PresetManager (juce::AudioProcessorValueTreeState& s) : apvts (s)
         userDir.createDirectory();
 
     buildFactory();
+    loadFavorites();
     currentName = factory.empty() ? "Init" : factory.front().name;
+}
+
+bool PresetManager::isFavorite (const juce::String& displayName) const
+{
+    return favorites.find (displayName) != favorites.end();
+}
+
+void PresetManager::toggleFavorite (const juce::String& displayName)
+{
+    if (! favorites.erase (displayName))
+        favorites.insert (displayName);
+    saveFavorites();
+    if (onChange) onChange();
+}
+
+void PresetManager::loadFavorites()
+{
+    favorites.clear();
+    if (favFile().existsAsFile())
+        for (auto& l : juce::StringArray::fromLines (favFile().loadFileAsString()))
+            if (l.trim().isNotEmpty())
+                favorites.insert (l.trim());
+}
+
+void PresetManager::saveFavorites() const
+{
+    juce::StringArray lines;
+    for (auto& n : favorites) lines.add (n);
+    favFile().replaceWithText (lines.joinIntoString ("\n"));
 }
 
 void PresetManager::buildFactory()
 {
     using V = std::vector<std::pair<juce::String, float>>;
-    auto add = [this] (const char* n, V v) { factory.push_back ({ n, std::move (v) }); };
+    using G = std::vector<GrooveModel::Step>;
+    auto add  = [this] (const char* n, V v) { factory.push_back ({ n, std::move (v), {} }); };
+    auto addG = [this] (const char* n, V v, G g) { factory.push_back ({ n, std::move (v), std::move (g) }); };
+    // groove step:  on, accent(0..1), tie, ratchet(1..4)
+    auto st = [] (bool on, float acc, bool tie, int rat) { return GrooveModel::Step { on, acc, tie, rat }; };
 
     add ("Init", {});
 
@@ -334,6 +368,39 @@ void PresetManager::buildFactory()
         { ID::arpGate, 0.45f }, { ID::chorus, 0.0f }, { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f },
         { ID::dlyFb, 0.3f }, { ID::dlyMix, 0.2f } });
 
+    // ---- groove-lane demos (showcase the 16-step arp groove) ----
+    // Nexus-style syncopation: rests, accents, a tie (step 14) and a ratchet (step 15)
+    addG ("AR Nexus Groove", { { ID::o1Saw, 1.0f }, { ID::fCutoff, 3200.0f }, { ID::fReso, 0.4f }, { ID::fEnvAmt, 0.6f },
+        { ID::fD, 0.18f }, { ID::fS, 0.0f }, { ID::aA, 0.003f }, { ID::aD, 0.2f }, { ID::aS, 0.0f }, { ID::aR, 0.12f },
+        { ID::arpOn, 1.0f }, { ID::arpMode, 0.0f }, { ID::arpRate, 3.0f }, { ID::arpOct, 2.0f }, { ID::arpGate, 0.5f },
+        { ID::arpGrooveOn, 1.0f }, { ID::chorus, 1.0f }, { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f },
+        { ID::dlyFb, 0.35f }, { ID::dlyMix, 0.25f } },
+        { st(true,1.00f,false,1), st(true,0.55f,false,1), st(true,0.70f,false,1), st(false,0.0f,false,1),
+          st(true,0.90f,false,1), st(true,0.55f,false,1), st(false,0.0f,false,1), st(true,0.80f,false,2),
+          st(true,1.00f,false,1), st(true,0.55f,false,1), st(true,0.70f,false,1), st(false,0.0f,false,1),
+          st(true,0.90f,false,1), st(true,0.60f,true, 1), st(true,0.80f,false,3), st(true,0.55f,false,1) });
+
+    // Peak-time Up&Down: driving all-on 16ths, downbeat accents, ratchet build at the end
+    addG ("AR Peak UpDown", { { ID::o1Saw, 1.0f }, { ID::o2On, 1.0f }, { ID::o2Saw, 0.8f }, { ID::o2Detune, 12.0f },
+        { ID::fCutoff, 2800.0f }, { ID::fReso, 0.35f }, { ID::fEnvAmt, 0.5f }, { ID::fD, 0.2f }, { ID::fS, 0.1f },
+        { ID::aA, 0.004f }, { ID::aD, 0.25f }, { ID::aS, 0.3f }, { ID::aR, 0.12f },
+        { ID::arpOn, 1.0f }, { ID::arpMode, 6.0f }, { ID::arpRate, 3.0f }, { ID::arpOct, 2.0f }, { ID::arpGate, 0.55f },
+        { ID::arpGrooveOn, 1.0f }, { ID::chorus, 2.0f }, { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 5.0f },
+        { ID::dlyFb, 0.3f }, { ID::dlyMix, 0.2f } },
+        { st(true,1.00f,false,1), st(true,0.50f,false,1), st(true,0.65f,false,1), st(true,0.50f,false,1),
+          st(true,0.90f,false,1), st(true,0.50f,false,1), st(true,0.65f,false,1), st(true,0.50f,false,1),
+          st(true,1.00f,false,1), st(true,0.50f,false,1), st(true,0.65f,false,1), st(true,0.50f,false,1),
+          st(true,0.90f,false,1), st(true,0.55f,false,1), st(true,0.70f,false,2), st(true,0.75f,false,3) });
+
+    // Ratchet rolls: short stab, 8-step lane, heavy ratchets + rests for space
+    addG ("AR Ratchet Rush", { { ID::o1Pulse, 1.0f }, { ID::o1Pw, 0.4f }, { ID::fCutoff, 2600.0f }, { ID::fReso, 0.5f },
+        { ID::fEnvAmt, 0.6f }, { ID::fD, 0.14f }, { ID::fS, 0.0f }, { ID::aA, 0.002f }, { ID::aD, 0.16f }, { ID::aS, 0.0f },
+        { ID::aR, 0.1f }, { ID::arpOn, 1.0f }, { ID::arpMode, 0.0f }, { ID::arpRate, 3.0f }, { ID::arpOct, 1.0f },
+        { ID::arpGate, 0.5f }, { ID::arpGrooveOn, 1.0f }, { ID::arpGrooveLen, 8.0f }, { ID::chorus, 1.0f },
+        { ID::dlyOn, 1.0f }, { ID::dlySync, 1.0f }, { ID::dlyNote, 7.0f }, { ID::dlyFb, 0.3f }, { ID::dlyMix, 0.22f } },
+        { st(true,1.00f,false,2), st(false,0.0f,false,1), st(true,0.80f,false,3), st(true,0.60f,false,1),
+          st(true,1.00f,false,4), st(false,0.0f,false,1), st(true,0.80f,false,2), st(true,0.65f,false,1) });
+
     // ---------------- FX / MISC ----------------
     add ("FX Noise Sweep", { { ID::noise, 0.8f }, { ID::o1Saw, 0.2f }, { ID::fType, 0.0f }, { ID::fCutoff, 300.0f },
         { ID::fReso, 0.6f }, { ID::fEnvAmt, 0.9f }, { ID::fA, 2.0f }, { ID::fD, 2.0f }, { ID::aA, 1.0f }, { ID::aR, 1.5f }, { ID::chorus, 2.0f } });
@@ -506,6 +573,7 @@ void PresetManager::initPatch()
     for (auto* base : params)
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (base))
             rp->setValueNotifyingHost (rp->getDefaultValue());
+    GrooveModel::resetPattern (apvts);   // groove lane isn't a parameter
     setCurrent ("Init");
 }
 
@@ -516,6 +584,8 @@ void PresetManager::loadFactory (const juce::String& name)
         {
             initPatch();
             applyValues (f.values);
+            if (! f.groove.empty())
+                GrooveModel::writePattern (apvts, f.groove);
             setCurrent (name);
             return;
         }

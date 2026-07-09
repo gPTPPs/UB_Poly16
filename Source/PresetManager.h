@@ -1,8 +1,10 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Parameters.h"
+#include "GrooveModel.h"
 #include <functional>
 #include <vector>
+#include <set>
 
 // Handles factory presets, user presets (one file each) and bank import/export.
 //  - User presets:  <Documents>/UB_Poly16/Presets/<name>.ubp   (XML of the APVTS state)
@@ -36,6 +38,10 @@ public:
     void loadNext();
     void loadPrevious();
 
+    // favorites (keyed by display name, e.g. "[F] AR Trance" or a user name)
+    bool isFavorite (const juce::String& displayName) const;
+    void toggleFavorite (const juce::String& displayName);
+
     bool exportBank (const juce::File& dest) const;   // all user presets -> one .ubbank
     int  importBank (const juce::File& src);          // returns number imported
 
@@ -51,15 +57,20 @@ private:
     struct Factory
     {
         juce::String name;
-        std::vector<std::pair<juce::String, float>> values; // actual (non-normalised) values
+        std::vector<std::pair<juce::String, float>> values;   // actual (non-normalised) values
+        std::vector<GrooveModel::Step> groove;                // empty = neutral (no groove lane)
     };
 
     void buildFactory();
     void applyValues (const std::vector<std::pair<juce::String, float>>& vals);
     void setCurrent (const juce::String& n);
+    void loadFavorites();
+    void saveFavorites() const;
+    juce::File favFile() const { return userDir.getChildFile ("favorites.txt"); }
 
     juce::AudioProcessorValueTreeState& apvts;
     juce::File userDir;
     juce::String currentName;
     std::vector<Factory> factory;
+    std::set<juce::String> favorites;
 };

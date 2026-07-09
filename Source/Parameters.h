@@ -101,6 +101,9 @@ namespace ID
     inline constexpr auto arpGate = "arpGate";
     inline constexpr auto arpHold = "arpHold";
     inline constexpr auto arpSync = "arpSync";
+    inline constexpr auto arpGrooveOn  = "arpGrooveOn";
+    inline constexpr auto arpGrooveLen = "arpGrooveLen";
+    inline constexpr auto arpSwing     = "arpSwing";
     inline constexpr auto bpm     = "bpm";
 
     // Chord memory
@@ -240,13 +243,17 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     // ---- Arp ----
     p.push_back (std::make_unique<AudioParameterBool>  (pid (ID::arpOn), "Arp On", false));
     p.push_back (std::make_unique<AudioParameterChoice> (pid (ID::arpMode), "Arp Mode",
-        StringArray { "Up", "Down", "Up/Down", "Random", "As Played" }, 0));
+        StringArray { "Up", "Down", "Up/Down", "Random", "As Played",
+                      "Down/Up", "Up&Down", "Converge", "Diverge" }, 0));
     p.push_back (std::make_unique<AudioParameterChoice> (pid (ID::arpRate), "Arp Rate",
         StringArray { "1/4", "1/8", "1/8T", "1/16", "1/16T", "1/32" }, 3));
     p.push_back (std::make_unique<AudioParameterInt>   (pid (ID::arpOct), "Arp Octaves", 1, 4, 1));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::arpGate), "Arp Gate", lin (0.05f, 1.0f), 0.5f));
     p.push_back (std::make_unique<AudioParameterBool>  (pid (ID::arpHold), "Arp Hold", false));
     p.push_back (std::make_unique<AudioParameterBool>  (pid (ID::arpSync), "Arp Sync DAW", true));
+    p.push_back (std::make_unique<AudioParameterBool>  (pid (ID::arpGrooveOn), "Arp Groove", false));
+    p.push_back (std::make_unique<AudioParameterInt>   (pid (ID::arpGrooveLen), "Arp Groove Len", 1, 16, 16));
+    p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::arpSwing), "Arp Swing", lin (0.0f, 0.75f), 0.0f));
     p.push_back (std::make_unique<AudioParameterFloat> (pid (ID::bpm), "Tempo", lin (40.0f, 300.0f), 120.0f));
 
     // ---- Chord memory ----

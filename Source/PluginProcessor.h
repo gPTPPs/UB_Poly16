@@ -4,6 +4,7 @@
 #include "Parameters.h"
 #include "SynthVoice.h"
 #include "Arpeggiator.h"
+#include "GrooveModel.h"
 #include "PresetManager.h"
 #include "Effects.h"
 #include "MidiTools.h"
@@ -44,6 +45,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     juce::AudioProcessorValueTreeState apvts;
+    GrooveModel groove { apvts };
     PresetManager presets { apvts };
     ChordMemory chord;
     MidiCcMap ccMap { apvts };

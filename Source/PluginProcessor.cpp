@@ -87,14 +87,22 @@ void UBAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
     juce::ScopedNoDenormals noDenormals;
     buffer.clear();
 
-    // ---- tempo: follow host transport when "Sync DAW" is on, else the Tempo knob ----
+    // ---- tempo + transport: follow the host when "Sync DAW" is on ----
     double bpm = apvts.getRawParameterValue (ID::bpm)->load();
     const bool syncToHost = apvts.getRawParameterValue (ID::arpSync)->load() > 0.5f;
-    if (syncToHost)
-        if (auto* ph = getPlayHead())
-            if (auto pos = ph->getPosition())
+    double ppqPos = 0.0;
+    bool   hostPlaying = false, haveHost = false;
+    if (auto* ph = getPlayHead())
+        if (auto pos = ph->getPosition())
+        {
+            haveHost = true;
+            if (syncToHost)
                 if (auto hostBpm = pos->getBpm())
                     bpm = *hostBpm;
+            if (auto q = pos->getPpqPosition())
+                ppqPos = *q;
+            hostPlaying = pos->getIsPlaying();
+        }
 
     // ---- MIDI CC mappings (MIDI Learn) + chord memory ----
     ccMap.process (midi);
@@ -108,6 +116,18 @@ void UBAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
     ap.gate    = apvts.getRawParameterValue (ID::arpGate)->load();
     ap.hold    = apvts.getRawParameterValue (ID::arpHold)->load() > 0.5f;
     ap.stepSeconds = stepSecondsFromRate ((int) apvts.getRawParameterValue (ID::arpRate)->load(), bpm);
+
+    // groove lane + phase-lock
+    ap.grooveOn  = apvts.getRawParameterValue (ID::arpGrooveOn)->load() > 0.5f;
+    ap.grooveLen = (int) apvts.getRawParameterValue (ID::arpGrooveLen)->load();
+    ap.swing     = apvts.getRawParameterValue (ID::arpSwing)->load();
+    ap.bpm       = bpm;
+    ap.stepBeats = ap.stepSeconds * (bpm / 60.0);
+    ap.ppqStart  = ppqPos;
+    ap.phaseLock = syncToHost && haveHost && hostPlaying;
+
+    groove.read (ap.steps);   // 16-step pattern (serialised in the preset state)
+
     arp.process (midi, buffer.getNumSamples(), ap);
 
     // ---- mono / legato (one sounding note, chosen by priority) ----
@@ -197,6 +217,7 @@ void UBAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
             if (const auto name = xml->getStringAttribute ("currentPresetName"); name.isNotEmpty())
                 presets.setCurrentName (name);   // absent in pre-0.6.1 states
             apvts.replaceState (juce::ValueTree::fromXml (*xml));
+            groove.refreshFromState();
         }
 }
 

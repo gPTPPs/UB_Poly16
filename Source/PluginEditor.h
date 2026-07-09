@@ -2,6 +2,8 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "PluginProcessor.h"
 #include "UBLookAndFeel.h"
+#include "GrooveGrid.h"
+#include "PresetBrowser.h"
 #include "Scope.h"
 
 // A titled panel that lays its child controls out in centred rows.
@@ -24,13 +26,18 @@ public:
     void paint (juce::Graphics& g) override
     {
         auto r = getLocalBounds().toFloat();
-        g.setColour (UBColours::panel);
-        g.fillRoundedRectangle (r, 8.0f);
+        juce::ColourGradient pg (UBColours::panel,  r.getX(), r.getY(),
+                                 UBColours::panel2, r.getX(), r.getBottom(), false);
+        g.setGradientFill (pg);
+        g.fillRoundedRectangle (r, 10.0f);
+        g.setColour (juce::Colours::white.withAlpha (0.05f));
+        g.drawRoundedRectangle (r.reduced (0.5f), 10.0f, 1.0f);
+
+        // thin header: azur title (structure) + short accent filet
         g.setColour (UBColours::accent);
-        g.fillRoundedRectangle (r.removeFromTop (22.0f).reduced (1.0f), 7.0f);
-        g.setColour (UBColours::bg);
-        g.setFont (juce::Font (juce::FontOptions (13.0f)).boldened());
-        g.drawText (title, getLocalBounds().removeFromTop (22), juce::Justification::centred);
+        g.setFont (juce::Font (juce::FontOptions (12.0f)).boldened());
+        g.drawText (title, 12, 6, getWidth() - 24, 16, juce::Justification::centredLeft);
+        g.fillRoundedRectangle (12.0f, 23.0f, 24.0f, 2.0f, 1.0f);
     }
 
     void resized() override
@@ -121,25 +128,29 @@ private:
     void savePresetDialog();
     void deletePresetDialog();
     void renamePresetDialog();
+    void showManageMenu();
+    void importBankDialog();
+    void exportBankDialog();
+    void showAudioSettings();
     void fixWindowPosition();
 
     UBAudioProcessor& proc;
     UBLookAndFeel lnf;
 
     // preset bar
-    juce::ComboBox presetBox;
-    juce::TextButton prevBtn { "<" }, nextBtn { ">" }, saveBtn { "Save" },
-                     renBtn { "Ren" }, delBtn { "Del" },
-                     initBtn { "Init" }, importBtn { "Import" }, exportBtn { "Export" },
-                     audioBtn { "Audio/MIDI" };
+    juce::TextButton prevBtn { "<" }, nextBtn { ">" }, saveBtn { "Save" }, presetField,
+                     dotsBtn { juce::String (juce::CharPointer_UTF8 ("\xe2\x8b\xaf")) };  // "..."
     bool isStandalone = false;
+    PresetBrowser browser { proc };
 
     // sections
     Section secDco1 { "DCO 1" }, secDco2 { "DCO 2" }, secFilter { "FILTER" }, secLfo { "LFO" },
             secAmp { "AMP ENV" }, secFenv { "FILTER ENV" }, secPenv { "PITCH ENV" },
             secArp { "ARP" }, secGlobal { "GLOBAL" },
             secDelay { "DELAY" }, secReverb { "REVERB" }, secUni { "UNISON" }, secChord { "CHORD" },
-            secScope { "SCOPE" };
+            secScope { "SCOPE" }, secGroove { "STEPS" }, secGrooveCtl { "GROOVE" };
+
+    GrooveGrid grooveGrid { proc.apvts, proc.groove };
 
     // chord memory UI
     juce::TextButton chordLearnBtn { "Learn" };
@@ -153,7 +164,7 @@ private:
 
     // oscilloscope + categorised preset list
     ScopeComponent scopeComp { proc.scope };
-    juce::StringArray presetIdToName;   // ComboBox item id-1 -> display name
+    std::vector<std::pair<juce::String, juce::Rectangle<int>>> zoneFrames;   // reflow zone labels/borders
 
     // owned controls + attachments
     juce::OwnedArray<juce::Slider> sliders;

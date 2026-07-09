@@ -73,7 +73,7 @@ public:
             if (i == 0) p.startNewSubPath (x, y);
             else        p.lineTo (x, y);
         }
-        g.setColour (UBColours::accent);
+        g.setColour (UBColours::active);
         g.strokePath (p, juce::PathStrokeType (1.6f));
     }
 

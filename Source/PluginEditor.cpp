@@ -10,69 +10,37 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     setLookAndFeel (&lnf);
 
     // ---- preset bar ----
-    addAndMakeVisible (presetBox);
-    presetBox.setTextWhenNothingSelected ("-- preset --");
-    presetBox.onChange = [this]
-    {
-        const int id = presetBox.getSelectedId();
-        if (id > 0 && id <= presetIdToName.size())
-            proc.presets.loadByDisplayName (presetIdToName[id - 1]);
-    };
-
     isStandalone = (proc.wrapperType == juce::AudioProcessor::wrapperType_Standalone);
 
-    for (auto* b : { &prevBtn, &nextBtn, &saveBtn, &renBtn, &delBtn, &initBtn, &importBtn, &exportBtn, &audioBtn })
+    for (auto* b : { &prevBtn, &nextBtn, &saveBtn, &presetField, &dotsBtn })
         addAndMakeVisible (b);
-    audioBtn.setVisible (isStandalone);   // a DAW host provides its own audio/MIDI setup
+    presetField.setColour (juce::TextButton::buttonColourId, UBColours::track);
 
-    audioBtn.onClick = [this]
-    {
-       #if JucePlugin_Build_Standalone
-        if (auto* holder = juce::StandalonePluginHolder::getInstance())
-            holder->showAudioSettingsDialog();
-       #endif
-    };
+    prevBtn.onClick     = [this] { proc.presets.loadPrevious(); };
+    nextBtn.onClick     = [this] { proc.presets.loadNext(); };
+    saveBtn.onClick     = [this] { savePresetDialog(); };
+    presetField.onClick = [this] { browser.open(); };
+    dotsBtn.onClick     = [this] { showManageMenu(); };
 
-    prevBtn.onClick   = [this] { proc.presets.loadPrevious(); };
-    nextBtn.onClick   = [this] { proc.presets.loadNext(); };
-    initBtn.onClick   = [this] { proc.presets.initPatch(); };
-    saveBtn.onClick   = [this] { savePresetDialog(); };
-    renBtn.onClick    = [this] { renamePresetDialog(); };
-    delBtn.onClick    = [this] { deletePresetDialog(); };
-
-    exportBtn.onClick = [this]
-    {
-        chooser = std::make_unique<juce::FileChooser> ("Export bank", proc.presets.getUserDir(),
-                                                       juce::String ("*") + PresetManager::bankExt);
-        chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting,
-            [this] (const juce::FileChooser& fc)
-            {
-                auto f = fc.getResult();
-                if (f != juce::File())
-                    proc.presets.exportBank (f.withFileExtension (PresetManager::bankExt));
-            });
-    };
-
-    importBtn.onClick = [this]
-    {
-        chooser = std::make_unique<juce::FileChooser> ("Import bank", proc.presets.getUserDir(),
-                                                       juce::String ("*") + PresetManager::bankExt);
-        chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-            [this] (const juce::FileChooser& fc)
-            {
-                auto f = fc.getResult();
-                if (f.existsAsFile())
-                    proc.presets.importBank (f);
-            });
-    };
+    addChildComponent (browser);
+    browser.onClose  = [this] { browser.setVisible (false); grooveGrid.repaint(); };
+    browser.onSave   = [this] { savePresetDialog(); };
+    browser.onRename = [this] { renamePresetDialog(); };
+    browser.onDelete = [this] { deletePresetDialog(); };
+    browser.onInit   = [this] { proc.presets.initPatch(); };
+    browser.onImport = [this] { importBankDialog(); };
+    browser.onExport = [this] { exportBankDialog(); };
 
     // ---- sections ----
     for (auto* s : { &secDco1, &secDco2, &secFilter, &secLfo, &secAmp, &secFenv, &secPenv, &secArp, &secGlobal,
-                     &secDelay, &secReverb, &secUni, &secChord, &secScope })
+                     &secDelay, &secReverb, &secUni, &secChord, &secScope, &secGroove, &secGrooveCtl })
         addAndMakeVisible (s);
 
     secScope.addAndMakeVisible (scopeComp);
     secScope.setFill (&scopeComp);
+
+    secGroove.addAndMakeVisible (grooveGrid);
+    secGroove.setFill (&grooveGrid);
 
     makeVSlider (secDco1, ID::o1Saw,   "Saw");
     makeVSlider (secDco1, ID::o1Tri,   "Tri");
@@ -144,10 +112,14 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     secArp.addBreak();
     makeCombo   (secArp, ID::arpMode, "Mode");
     makeCombo   (secArp, ID::arpRate, "Rate");
-    secArp.addBreak();
     makeKnob    (secArp, ID::arpOct,  "Octaves");
     makeKnob    (secArp, ID::arpGate, "Gate");
     makeKnob    (secArp, ID::bpm,     "Tempo");
+
+    // groove controls live in their own panel next to the step grid (below)
+    makeToggle  (secGrooveCtl, ID::arpGrooveOn,  "Groove", 84);
+    makeKnob    (secGrooveCtl, ID::arpSwing,      "Swing");
+    makeKnob    (secGrooveCtl, ID::arpGrooveLen,  "Steps");
 
     makeToggle  (secDelay, ID::dlyOn,   "Delay On", 96);
     makeToggle  (secDelay, ID::dlySync, "Sync", 70);
@@ -155,7 +127,6 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     secDelay.addBreak();
     makeCombo   (secDelay, ID::dlyNote, "Note");
     makeKnob    (secDelay, ID::dlyTime, "Time ms");
-    secDelay.addBreak();
     makeKnob    (secDelay, ID::dlyFb,   "Feedback");
     makeKnob    (secDelay, ID::dlyTone, "Tone");
     makeKnob    (secDelay, ID::dlyMix,  "Mix");
@@ -182,7 +153,6 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     makeKnob    (secReverb, ID::rvbSize,  "Size");
     makeKnob    (secReverb, ID::rvbDamp,  "Damp");
     makeKnob    (secReverb, ID::rvbWidth, "Width");
-    secReverb.addBreak();
     makeKnob    (secReverb, ID::rvbPre,   "PreDly");
     makeKnob    (secReverb, ID::rvbMix,   "Mix");
 
@@ -200,11 +170,11 @@ UBEditor::UBEditor (UBAudioProcessor& p)
     refreshPresetList();
 
     setResizable (true, true);
-    setResizeLimits (1000, 740, 1800, 1300);
-    setSize (1560, 960);
+    setResizeLimits (1000, 860, 1800, 1400);
+    setSize (1560, 988);
 
     learnLabel.setJustificationType (juce::Justification::centredRight);
-    learnLabel.setColour (juce::Label::textColourId, UBColours::accent);
+    learnLabel.setColour (juce::Label::textColourId, UBColours::active);
     learnLabel.setFont (juce::Font (juce::FontOptions (13.0f)).boldened());
     addAndMakeVisible (learnLabel);
 
@@ -238,7 +208,7 @@ void UBEditor::timerCallback()
     if (armed.isNotEmpty())
     {
         auto* p = proc.apvts.getParameter (armed);
-        learnTxt = "MIDI Learn : envoyez un CC -> "
+        learnTxt = "MIDI Learn: send a CC -> "
                    + (p != nullptr ? p->getName (32) : armed) + "...";
     }
     if (learnLabel.getText() != learnTxt)
@@ -271,9 +241,9 @@ void UBEditor::mouseDown (const juce::MouseEvent& e)
 
     const int cc = proc.ccMap.getCcFor (pid);
     juce::PopupMenu m;
-    m.addItem (1, cc >= 0 ? "MIDI Learn (actuellement CC " + juce::String (cc) + ")" : "MIDI Learn");
+    m.addItem (1, cc >= 0 ? "MIDI Learn (currently CC " + juce::String (cc) + ")" : "MIDI Learn");
     if (cc >= 0)
-        m.addItem (2, "Retirer le mapping MIDI");
+        m.addItem (2, "Remove MIDI mapping");
     m.showMenuAsync (juce::PopupMenu::Options(), [this, pid] (int r)
     {
         if (r == 1)      proc.ccMap.armLearn (pid);
@@ -298,16 +268,18 @@ void UBEditor::fixWindowPosition()
 
     const auto wb = top->getScreenBounds();
     const auto& displays = juce::Desktop::getInstance().getDisplays();
-    const auto total = displays.getTotalBounds (true);
 
-    const bool onScreen = total.intersects (wb) && total.contains (wb.getCentre());
-    if (! onScreen)
-        if (auto* main = displays.getPrimaryDisplay())
-        {
-            const auto area = main->userArea;
-            top->setTopLeftPosition (area.getX() + (area.getWidth()  - top->getWidth())  / 2,
-                                     area.getY() + (area.getHeight() - top->getHeight()) / 2);
-        }
+    // Centre the window on the display it sits on, keeping the top-left inside the
+    // usable area so the title/preset bar is always reachable — even if a stale
+    // saved position (e.g. from a previously oversized window) pushed it off-screen.
+    auto* disp = displays.getDisplayForRect (wb, true);
+    if (disp == nullptr) disp = displays.getPrimaryDisplay();
+    if (disp == nullptr) return;
+
+    const auto area = disp->userArea;
+    const int x = area.getX() + juce::jmax (0, (area.getWidth()  - wb.getWidth())  / 2);
+    const int y = area.getY() + juce::jmax (0, (area.getHeight() - wb.getHeight()) / 2);
+    top->setTopLeftPosition (x, y);
 }
 
 UBEditor::~UBEditor()
@@ -397,61 +369,84 @@ juce::ToggleButton* UBEditor::makeToggle (Section& sec, const juce::String& id, 
 
 void UBEditor::refreshPresetList()
 {
-    presetBox.clear (juce::dontSendNotification);
-    presetIdToName.clear();
-
-    auto headingFor = [] (const juce::String& n) -> juce::String
-    {
-        const auto pfx = n.upToFirstOccurrenceOf (" ", false, false);
-        if (pfx == "BS") return "BASS";
-        if (pfx == "LD") return "LEAD";
-        if (pfx == "PD") return "PAD";
-        if (pfx == "KY") return "KEYS";
-        if (pfx == "PL") return "PLUCK";
-        if (pfx == "BR") return "BRASS";
-        if (pfx == "ST") return "STRINGS";
-        if (pfx == "AR") return "ARP";
-        if (pfx == "FX") return "FX";
-        if (pfx == "PC") return "PERCUSSION";
-        if (pfx == "LG") return "LEGENDS";
-        return {};   // Init & friends live at the top, before the first heading
-    };
-
-    int id = 0;
-    juce::String lastHeading;
-    for (auto& n : proc.presets.getFactoryNames())
-    {
-        const auto h = headingFor (n);
-        if (h.isNotEmpty() && h != lastHeading)
-        {
-            presetBox.addSectionHeading (h);
-            lastHeading = h;
-        }
-        presetBox.addItem (n, ++id);
-        presetIdToName.add (juce::String (PresetManager::factoryPrefix) + n);
-    }
-
-    const auto users = proc.presets.getUserNames();
-    if (! users.isEmpty())
-        presetBox.addSectionHeading ("USER");
-    for (auto& n : users)
-    {
-        presetBox.addItem (n, ++id);
-        presetIdToName.add (n);
-    }
-
     const auto cur = proc.presets.getCurrentName();
-    for (int i = 0; i < presetIdToName.size(); ++i)
-        if (presetIdToName[i] == cur || presetIdToName[i] == juce::String (PresetManager::factoryPrefix) + cur)
-        {
-            presetBox.setSelectedId (i + 1, juce::dontSendNotification);
-            break;
-        }
 
-    // Rename/Delete only apply to user presets (factory presets are read-only)
-    const bool isUser = proc.presets.isUserPreset (cur);
-    renBtn.setEnabled (isUser);
-    delBtn.setEnabled (isUser);
+    // field shows the clean name (drop a leading 2-letter category code)
+    juce::String label = cur;
+    const auto tok = cur.upToFirstOccurrenceOf (" ", false, false);
+    if (tok.length() == 2 && tok.containsOnly ("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+        label = cur.fromFirstOccurrenceOf (" ", false, false);
+    presetField.setButtonText (label.isEmpty() ? "-- preset --" : label);
+
+    browser.refresh();
+    proc.groove.refreshFromState();   // ensure the audio-side snapshot matches the loaded tree
+    grooveGrid.repaint();             // show a freshly-loaded step pattern without needing a click
+}
+
+void UBEditor::showManageMenu()
+{
+    const bool isUser = proc.presets.isUserPreset (proc.presets.getCurrentName());
+    juce::PopupMenu m;
+    m.addItem (1, "Rename...", isUser);
+    m.addItem (2, "Delete",    isUser);
+    m.addSeparator();
+    m.addItem (3, "Init patch");
+    m.addSeparator();
+    m.addItem (4, "Import bank...");
+    m.addItem (5, "Export bank...");
+    if (isStandalone)
+    {
+        m.addSeparator();
+        m.addItem (6, "Audio/MIDI Settings...");
+    }
+    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&dotsBtn),
+        [this] (int r)
+        {
+            switch (r)
+            {
+                case 1: renamePresetDialog(); break;
+                case 2: deletePresetDialog(); break;
+                case 3: proc.presets.initPatch(); break;
+                case 4: importBankDialog(); break;
+                case 5: exportBankDialog(); break;
+                case 6: showAudioSettings(); break;
+                default: break;
+            }
+        });
+}
+
+void UBEditor::importBankDialog()
+{
+    chooser = std::make_unique<juce::FileChooser> ("Import bank", proc.presets.getUserDir(),
+                                                   juce::String ("*") + PresetManager::bankExt);
+    chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+        [this] (const juce::FileChooser& fc)
+        {
+            auto f = fc.getResult();
+            if (f.existsAsFile())
+                proc.presets.importBank (f);
+        });
+}
+
+void UBEditor::exportBankDialog()
+{
+    chooser = std::make_unique<juce::FileChooser> ("Export bank", proc.presets.getUserDir(),
+                                                   juce::String ("*") + PresetManager::bankExt);
+    chooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting,
+        [this] (const juce::FileChooser& fc)
+        {
+            auto f = fc.getResult();
+            if (f != juce::File())
+                proc.presets.exportBank (f.withFileExtension (PresetManager::bankExt));
+        });
+}
+
+void UBEditor::showAudioSettings()
+{
+   #if JucePlugin_Build_Standalone
+    if (auto* holder = juce::StandalonePluginHolder::getInstance())
+        holder->showAudioSettingsDialog();
+   #endif
 }
 
 void UBEditor::savePresetDialog()
@@ -530,10 +525,26 @@ void UBEditor::deletePresetDialog()
 void UBEditor::paint (juce::Graphics& g)
 {
     g.fillAll (UBColours::bg);
+
+    // reflow zones: subtle azur frame + label bundling related panels
+    for (auto& zf : zoneFrames)
+    {
+        auto rf = zf.second.toFloat();
+        g.setColour (UBColours::accent.withAlpha (0.035f));
+        g.fillRoundedRectangle (rf, 11.0f);
+        g.setColour (UBColours::accent.withAlpha (0.22f));
+        g.drawRoundedRectangle (rf.reduced (0.5f), 11.0f, 1.0f);
+        g.setColour (UBColours::accent);
+        g.setFont (juce::Font (juce::FontOptions (11.0f)).boldened());
+        g.drawText (zf.first, zf.second.getX() + 13, zf.second.getY() + 3,
+                    zf.second.getWidth() - 22, 14, juce::Justification::centredLeft);
+    }
 }
 
 void UBEditor::resized()
 {
+    browser.setBounds (getLocalBounds());   // full-window overlay
+
     auto area = getLocalBounds().reduced (8);
 
     // ---- preset bar ----
@@ -545,42 +556,66 @@ void UBEditor::resized()
         {
             return juce::FlexItem (c).withFlex (flex).withMinWidth (w).withMargin (juce::FlexItem::Margin (0, 3, 0, 0));
         };
-        fb.items.add (item (prevBtn,   0.0f, 32));
-        fb.items.add (item (presetBox, 1.0f, 160));
-        fb.items.add (item (nextBtn,   0.0f, 32));
-        fb.items.add (item (saveBtn,   0.0f, 64));
-        fb.items.add (item (renBtn,    0.0f, 48));
-        fb.items.add (item (delBtn,    0.0f, 48));
-        fb.items.add (item (initBtn,   0.0f, 56));
-        fb.items.add (item (importBtn, 0.0f, 72));
-        fb.items.add (item (exportBtn, 0.0f, 72));
-        if (isStandalone)
-            fb.items.add (item (audioBtn, 0.0f, 92));
-        fb.items.add (item (learnLabel, 0.8f, 120));   // empty when no learn is armed
+        fb.items.add (item (prevBtn,     0.0f, 32));
+        fb.items.add (item (presetField, 1.0f, 220));
+        fb.items.add (item (nextBtn,     0.0f, 32));
+        fb.items.add (item (saveBtn,     0.0f, 64));
+        fb.items.add (item (dotsBtn,     0.0f, 40));
+        fb.items.add (item (learnLabel,  0.7f, 120));   // empty when no learn is armed
         fb.performLayout (bar);
     }
 
     area.removeFromTop (8);
 
     const int gap = 8;
-    const int rowH = (area.getHeight() - 2 * gap) / 3;
-    auto row1 = area.removeFromTop (rowH);
+    const int bottomH = 170;                    // ARP & GROOVE band (ARP is now 2 rows)
+    auto bottomRow = area.removeFromBottom (bottomH);
+    area.removeFromBottom (gap);
+    const int fxH = 166;                        // FX (Delay/Reverb/Scope) — knobs on one row each
+    auto row3 = area.removeFromBottom (fxH);
+    area.removeFromBottom (gap);
+    const int row1H = 282;                      // oscillators row (FILTER's two knob rows are tallest)
+    auto row1 = area.removeFromTop (row1H);
     area.removeFromTop (gap);
-    auto row2 = area.removeFromTop (rowH);
-    area.removeFromTop (gap);
-    auto row3 = area;
+    auto row2 = area;                           // VOICE & GLOBAL row takes the remainder
 
-    auto layoutRow = [] (juce::Rectangle<int> r, std::vector<std::pair<Section*, float>> items)
+    struct Zone { juce::String title; float weight; std::vector<std::pair<Section*, float>> panels; };
+    zoneFrames.clear();
+    const int zoneHdr = 16;
+
+    auto layoutZones = [&] (juce::Rectangle<int> row, const std::vector<Zone>& zones)
     {
-        juce::FlexBox fb;
-        fb.flexDirection = juce::FlexBox::Direction::row;
-        for (auto& it : items)
-            fb.items.add (juce::FlexItem (*it.first).withFlex (it.second).withMargin (juce::FlexItem::Margin (0, 4, 0, 4)));
-        fb.performLayout (r);
+        float tw = 0.0f;
+        for (auto& z : zones) tw += z.weight;
+        const int zgap = 10;
+        const int avail = row.getWidth() - zgap * juce::jmax (0, (int) zones.size() - 1);
+        int x = row.getX();
+        for (size_t zi = 0; zi < zones.size(); ++zi)
+        {
+            const auto& z = zones[zi];
+            const int zw = (zi + 1 == zones.size()) ? (row.getRight() - x)
+                                                    : (int) std::round (avail * (z.weight / tw));
+            juce::Rectangle<int> zr (x, row.getY(), zw, row.getHeight());
+            zoneFrames.push_back ({ z.title, zr });
+
+            auto inner = zr;
+            inner.removeFromTop (zoneHdr);
+            inner = inner.reduced (5, 3);
+            juce::FlexBox fb;
+            fb.flexDirection = juce::FlexBox::Direction::row;
+            for (auto& p : z.panels)
+                fb.items.add (juce::FlexItem (*p.first).withFlex (p.second)
+                                  .withMargin (juce::FlexItem::Margin (0, 3, 0, 3)));
+            fb.performLayout (inner);
+            x += zw + zgap;
+        }
     };
 
-    layoutRow (row1, { { &secDco1, 1.0f }, { &secDco2, 1.8f }, { &secFilter, 1.2f }, { &secLfo, 0.8f } });
-    layoutRow (row2, { { &secAmp, 0.85f }, { &secFenv, 0.85f }, { &secPenv, 0.95f }, { &secArp, 1.3f }, { &secGlobal, 1.05f } });
-    layoutRow (row3, { { &secUni, 0.62f }, { &secChord, 0.72f }, { &secDelay, 1.25f }, { &secReverb, 0.9f },
-                       { &secScope, 0.72f } });
+    layoutZones (row1, { { "OSCILLATORS",  2.8f, { { &secDco1, 1.0f }, { &secDco2, 1.8f } } },
+                         { "FILTER & MOD", 2.0f, { { &secFilter, 1.2f }, { &secLfo, 0.8f } } } });
+    layoutZones (row2, { { "ENVELOPES",      2.65f, { { &secAmp, 0.85f }, { &secFenv, 0.85f }, { &secPenv, 0.95f } } },
+                         { "VOICE & GLOBAL", 2.40f, { { &secUni, 0.62f }, { &secChord, 0.72f }, { &secGlobal, 1.05f } } } });
+    layoutZones (row3, { { "FX", 1.0f, { { &secDelay, 1.25f }, { &secReverb, 0.9f }, { &secScope, 0.72f } } } });
+    layoutZones (bottomRow, { { "ARP & GROOVE", 1.0f,
+                               { { &secArp, 1.2f }, { &secGrooveCtl, 0.85f }, { &secGroove, 2.0f } } } });
 }
