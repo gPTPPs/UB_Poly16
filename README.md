@@ -22,7 +22,7 @@ A tribute by THE UNBoRN / [RetroVault](https://retrovault.be).
   ratchet, global swing, host-PPQ phase-lock, and 9 note orders
 - Master FX: Juno-style chorus (I/II/I+II), tempo-synced stereo/ping-pong delay, reverb
 - Oscilloscope
-- **Preset browser** with categories, live search and favourites — **131 factory presets**
+- **Preset browser** with categories, live search and favourites — **138 factory presets**
   (including a "Legends" bank of classic-synth homages), user presets + bank import/export
 - Resizable custom GUI (azur / mauve theme)
 

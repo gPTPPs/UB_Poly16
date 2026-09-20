@@ -453,6 +453,69 @@ void PresetManager::buildFactory()
         { ID::o2Coarse, 7.0f }, { ID::o2Ring, 0.3f }, { ID::fType, 4.0f }, { ID::fCutoff, 2600.0f }, { ID::fReso, 0.4f },
         { ID::aA, 0.001f }, { ID::aD, 0.3f }, { ID::aS, 0.0f }, { ID::aR, 0.15f }, { ID::chorus, 0.0f } });
 
+    // ---- Peaux et cymbales : la moitie manquante de la boite a rythmes ----
+    // Il n'y avait ni caisse claire, ni clap, ni charley : impossible de faire un morceau
+    // rythmique sans fabriquer les sons a la main dans le .state. Tout part du bruit
+    // (ID::noise) filtre en bande (fType 4/5) pour les peaux, en passe-haut (fType 3) pour
+    // les cymbales, avec une enveloppe d'ampli tres courte. Rappels des defauts d'Init a
+    // neutraliser sur CHAQUE patch percussif : o1Saw = 0.8, aS = 0.8, chorus = I.
+
+    // Caisse claire techno : bruit en bande + un rien de corps triangle, courte chute de
+    // hauteur pour le claquement, petite reverb qui donne la taille sans noyer un roulement
+    add ("PC Techno Snare", { { ID::o1Saw, 0.0f }, { ID::o1Tri, 0.25f }, { ID::noise, 1.0f },
+        { ID::attackClick, 0.5f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 10.0f },
+        { ID::pA, 0.001f }, { ID::pD, 0.05f }, { ID::pS, 0.0f },
+        { ID::fType, 5.0f }, { ID::fCutoff, 1900.0f }, { ID::fReso, 0.35f }, { ID::fDrive, 2.5f },
+        { ID::fEnvAmt, 0.35f }, { ID::fA, 0.001f }, { ID::fD, 0.09f }, { ID::fS, 0.0f }, { ID::hpf, 2.0f },
+        { ID::aA, 0.001f }, { ID::aD, 0.17f }, { ID::aS, 0.0f }, { ID::aR, 0.11f }, { ID::chorus, 0.0f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.32f }, { ID::rvbDamp, 0.4f }, { ID::rvbPre, 8.0f },
+        { ID::rvbMix, 0.22f } });
+    // Version seche et claquante : bande plus haute, transitoire plus dur, pas de reverb.
+    // C'est celle qui passe devant un kick charge, la ou la Techno Snare se fait manger
+    add ("PC Snare Crack", { { ID::o1Saw, 0.0f }, { ID::noise, 1.0f }, { ID::attackClick, 0.7f },
+        { ID::fType, 5.0f }, { ID::fCutoff, 3000.0f }, { ID::fReso, 0.5f }, { ID::fDrive, 2.0f },
+        { ID::fEnvAmt, 0.25f }, { ID::fA, 0.001f }, { ID::fD, 0.05f }, { ID::fS, 0.0f }, { ID::hpf, 3.0f },
+        { ID::aA, 0.001f }, { ID::aD, 0.1f }, { ID::aS, 0.0f }, { ID::aR, 0.07f }, { ID::chorus, 0.0f } });
+    // Version grasse : bande basse, plus de corps, chute de hauteur plus longue. Elle tient
+    // le contretemps d'un morceau lent, mais elle brouille les roulements rapides
+    add ("PC Deep Snare", { { ID::o1Saw, 0.0f }, { ID::o1Tri, 0.45f }, { ID::noise, 0.8f },
+        { ID::attackClick, 0.35f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 14.0f },
+        { ID::pA, 0.001f }, { ID::pD, 0.07f }, { ID::pS, 0.0f },
+        { ID::fType, 5.0f }, { ID::fCutoff, 900.0f }, { ID::fReso, 0.25f }, { ID::fDrive, 3.0f },
+        { ID::fEnvAmt, 0.3f }, { ID::fA, 0.001f }, { ID::fD, 0.12f }, { ID::fS, 0.0f }, { ID::hpf, 1.0f },
+        { ID::aA, 0.001f }, { ID::aD, 0.26f }, { ID::aS, 0.0f }, { ID::aR, 0.16f }, { ID::chorus, 0.0f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.4f }, { ID::rvbDamp, 0.5f }, { ID::rvbPre, 12.0f },
+        { ID::rvbMix, 0.25f } });
+    // Clap : un vrai clap est fait de plusieurs frappes decalees. Le synthe n'a pas de
+    // multi-tap, donc c'est le PRE-DELAY de la reverb (25 ms) qui fabrique l'etalement,
+    // et l'attaque volontairement pas instantanee (aA 4 ms) qui enleve le cote "tic"
+    add ("PC Clap", { { ID::o1Saw, 0.0f }, { ID::noise, 1.0f }, { ID::attackClick, 0.3f },
+        { ID::fType, 5.0f }, { ID::fCutoff, 1200.0f }, { ID::fReso, 0.45f }, { ID::fDrive, 2.0f },
+        { ID::fEnvAmt, 0.2f }, { ID::fA, 0.001f }, { ID::fD, 0.08f }, { ID::fS, 0.0f }, { ID::hpf, 2.0f },
+        { ID::aA, 0.004f }, { ID::aD, 0.2f }, { ID::aS, 0.0f }, { ID::aR, 0.14f }, { ID::chorus, 0.0f },
+        { ID::rvbOn, 1.0f }, { ID::rvbSize, 0.25f }, { ID::rvbDamp, 0.35f }, { ID::rvbPre, 25.0f },
+        { ID::rvbMix, 0.35f } });
+    // Rimshot : plus de bois que de peau, donc plus de triangle que de bruit, bande etroite
+    // (BP24) et chute de hauteur brutale sur 25 ms
+    add ("PC Rim Shot", { { ID::o1Saw, 0.0f }, { ID::o1Tri, 0.5f }, { ID::noise, 0.35f },
+        { ID::attackClick, 0.6f }, { ID::pEnvTarget, 1.0f }, { ID::pEnvAmt, 20.0f },
+        { ID::pA, 0.001f }, { ID::pD, 0.025f }, { ID::pS, 0.0f },
+        { ID::fType, 4.0f }, { ID::fCutoff, 2600.0f }, { ID::fReso, 0.6f }, { ID::fDrive, 2.0f },
+        { ID::hpf, 2.0f }, { ID::aA, 0.001f }, { ID::aD, 0.05f }, { ID::aS, 0.0f },
+        { ID::aR, 0.04f }, { ID::chorus, 0.0f } });
+    // Charley ferme : bruit seul, passe-haut franc, enveloppe si courte qu'il ne reste
+    // que le tic. Le HPF Juno en position 3 s'ajoute au filtre pour degager le bas
+    add ("PC Closed Hat", { { ID::o1Saw, 0.0f }, { ID::noise, 1.0f },
+        { ID::fType, 3.0f }, { ID::fCutoff, 8000.0f }, { ID::fReso, 0.15f }, { ID::hpf, 3.0f },
+        { ID::aA, 0.001f }, { ID::aD, 0.05f }, { ID::aS, 0.0f }, { ID::aR, 0.035f },
+        { ID::chorus, 0.0f } });
+    // Charley ouvert : meme recette, enveloppe dix fois plus longue. Le relacher coupe le
+    // son (aR 0.35), donc la duree de la note dans le tracker decide de l'ouverture
+    add ("PC Open Hat", { { ID::o1Saw, 0.0f }, { ID::noise, 1.0f },
+        { ID::fType, 3.0f }, { ID::fCutoff, 7000.0f }, { ID::fReso, 0.2f }, { ID::hpf, 3.0f },
+        { ID::aA, 0.001f }, { ID::aD, 0.45f }, { ID::aS, 0.0f }, { ID::aR, 0.35f },
+        { ID::chorus, 0.0f } });
+
     // ---------------- LEGENDS (v0.6 phase 1 : hommages aux classiques) ----------------
     // Minimoog Model D : 2 "oscs" saw legerement desaccordes, ladder 24 dB pousse par le drive
     add ("LG Mini Bass", { { ID::o1Saw, 1.0f }, { ID::o1Octave, -1.0f }, { ID::o2On, 1.0f }, { ID::o2Saw, 1.0f },
